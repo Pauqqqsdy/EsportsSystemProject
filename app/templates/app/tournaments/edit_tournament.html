@@ -1,0 +1,347 @@
+{% extends "app/layout.html" %}
+{% load static %}
+{% block content %}
+<style>
+    /* Градиентный фон карточки */
+    .card-body-edit-tournament {
+        background: linear-gradient(145deg, #1a1a2e, #161b2e);
+        border-radius: 10px;
+        padding: 2rem;
+    }
+
+        .card-body-edit-tournament h3 {
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 2rem;
+        }
+
+    /* Тень под карточкой */
+    .card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Лейблы форм */
+    label {
+        font-weight: 500;
+        color: #ffffff;
+    }
+
+    /* Поля ввода */
+    input[type="text"],
+    input[type="file"] {
+        background-color: #ffffff;
+        border: none;
+        color: black;
+        border-radius: 10px;
+        padding: 10px 15px;
+        width: 100%;
+        font-size: 1rem;
+    }
+
+        input[type="text"]::placeholder,
+        input[type="file"]::placeholder {
+            color: #fff !important;
+            opacity: 0.7;
+        }
+
+        input[type="text"]:focus,
+        input[type="file"]:focus {
+            background-color: #ffffff;
+            border-color: #ffffff;
+            color: black;
+            box-shadow: 0 0 0 0.2rem rgba(76, 201, 240, 0.25);
+        }
+
+    /* Подсказки */
+    .form-text {
+        color: #ffffff;
+        font-size: 0.9rem;
+    }
+
+    /* Сообщения об ошибках */
+    .invalid-feedback {
+        color: #ffcccc;
+        font-size: 0.9rem;
+    }
+
+    /* Кнопки */
+    .btn-primary {
+        background-color: #4cc9f0;
+        border: none;
+        font-weight: bold;
+        padding: 10px 20px;
+        font-size: 1.1rem;
+        border-radius: 10px;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-primary:hover {
+            background-color: #3aa7cc;
+        }
+
+    .btn-outline-secondary {
+        border: 1px solid #4cc9f0;
+        color: #4cc9f0;
+        border-radius: 10px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+
+        .btn-outline-secondary:hover {
+            background-color: #4cc9f0;
+            color: #ffffff;
+        }
+
+    .btn-danger {
+        background-color: #ef476f;
+        border: none;
+        font-weight: bold;
+        border-radius: 10px;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-danger:hover {
+            background-color: #d9305c;
+        }
+
+    /* Иконки */
+    i.fas {
+        color: #4cc9f0;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 576px) {
+        .card-body-edit-tournament {
+            padding: 1.5rem;
+        }
+    }
+</style>
+
+<div class="container mt-5 py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-body card-body-edit-tournament">
+                    <h3 class="mb-4">
+                        <i class="fas fa-edit me-2 text-primary"></i>Редактирование турнира "{{ tournament.name }}"
+                    </h3>
+                    <form method="post">
+                        {% csrf_token %}
+                        <!-- Название турнира -->
+                        <div class="mb-3">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">
+                                <i class="fas fa-tag me-1"></i>Название турнира*
+                            </label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                            <div class="invalid-feedback d-block">{{ form.name.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <!-- Максимальное количество команд -->
+                        <div class="mb-3">
+                            <label for="{{ form.max_teams.id_for_label }}" class="form-label">
+                                <i class="fas fa-users me-1"></i>Максимальное количество команд*
+                            </label>
+                            {{ form.max_teams }}
+                            {% if form.max_teams.errors %}
+                            <div class="invalid-feedback d-block">{{ form.max_teams.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <!-- Дата начала -->
+                        <div class="mb-3">
+                            <label for="{{ form.start_date.id_for_label }}" class="form-label">
+                                <i class="fas fa-calendar-alt me-1"></i>Дата начала турнира*
+                            </label>
+                            {{ form.start_date }}
+                            {% if form.start_date.errors %}
+                            <div class="invalid-feedback d-block">{{ form.start_date.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <!-- Дисциплина -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-gamepad me-1"></i>Дисциплина*
+                            </label>
+                            <input type="text" class="form-control" value="{{ tournament.get_discipline_display }}" readonly>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Дисциплину нельзя изменить после создания турнира
+                            </div>
+                        </div>
+                        <!-- Формат игры -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-layer-group me-1"></i>Формат игры*
+                            </label>
+                            <input type="text" class="form-control" value="{{ tournament.get_game_format_display }}" readonly>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Формат игры нельзя изменить после создания турнира
+                            </div>
+                        </div>
+                        <!-- Локация -->
+                        <div class="mb-3">
+                            <label for="{{ form.location.id_for_label }}" class="form-label">
+                                <i class="fas fa-map-marker-alt me-1"></i>Локация турнира*
+                            </label>
+                            {{ form.location }}
+                            {% if form.location.errors %}
+                            <div class="invalid-feedback d-block">{{ form.location.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <!-- Описание -->
+                        <div class="mb-4">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">
+                                <i class="fas fa-align-left me-1"></i>Описание турнира
+                            </label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                            <div class="invalid-feedback d-block">{{ form.description.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex flex-column gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Сохранить изменения
+                            </button>
+                            <div class="d-flex justify-content-between gap-2 flex-wrap">
+                                <a href="{% url 'tournament_detail' tournament_id=tournament.id %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-1"></i>Отмена
+                                </a>
+                                <button type="button" class="btn btn-danger" onclick="confirmDeleteTournament()">
+                                    <i class="fas fa-trash me-1"></i>Удалить турнир
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Управление командами -->
+    <div class="row justify-content-center mt-4">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-transparent border-0">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users-cog me-2 text-primary"></i>Управление командами
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if tournament.registered_teams.all %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th><i class="fas fa-user me-1"></i>Команда</th>
+                                    <th><i class="fas fa-cog me-1"></i>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for team in tournament.registered_teams.all %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if tournament.game_format == '1x1' %}
+                                            <i class="fas fa-user me-2 text-primary"></i>
+                                            {{ team.captain.username }}
+                                            {% else %}
+                                            <i class="fas fa-users me-2 text-primary"></i>
+                                            {{ team.name }}
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-danger btn-sm remove-team-btn"
+                                                data-team-id="{{ team.id }}"
+                                                data-team-name="{% if tournament.game_format == '1x1' %}{{ team.captain.username }}{% else %}{{ team.name }}{% endif %}">
+                                            <i class="fas fa-trash me-1"></i>Удалить
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Нет зарегистрированных команд</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.remove-team-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const teamId = this.getAttribute('data-team-id');
+            const teamName = this.getAttribute('data-team-name');
+            confirmRemoveTeam(teamId, teamName);
+        });
+    });
+});
+
+function confirmRemoveTeam(teamId, teamName) {
+    const isOneVsOne = '{{ tournament.game_format }}' === '1x1';
+    const participantType = isOneVsOne ? 'участника' : 'команду';
+    const confirmMessage = `Вы уверены, что хотите исключить ${participantType} "${teamName}" из турнира?`;
+    if (confirm(confirmMessage)) {
+        fetch(`/tournaments/{{ tournament.id }}/remove_team/${teamId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.error || 'Произошла ошибка при удалении команды');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.error || 'Произошла ошибка');
+            }
+        })
+        .catch(error => {
+            alert(error.message || 'Произошла ошибка при удалении команды');
+        });
+    }
+}
+
+function confirmDeleteTournament() {
+    if (confirm('Вы уверены, что хотите удалить турнир? Это действие нельзя отменить.')) {
+        fetch(`/tournaments/{{ tournament.id }}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = '/tournaments/';
+            } else {
+                alert(data.error || 'Произошла ошибка');
+            }
+        })
+        .catch(error => {
+            alert('Произошла ошибка: ' + error);
+        });
+    }
+}
+</script>
+{% endblock %}

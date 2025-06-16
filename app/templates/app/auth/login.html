@@ -1,0 +1,178 @@
+﻿{% extends "app/layout.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+    /* Градиентный фон карточки */
+    .card-body-login {
+        background: linear-gradient(145deg, #1a1a2e, #161b2e);
+        border-radius: 10px;
+        padding: 2rem;
+    }
+
+    /* Тень под карточкой */
+    .card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Заголовок формы */
+    .card-body-login h2 {
+        font-weight: bold;
+        color: #ffffff;
+    }
+
+    /* Лейблы форм */
+    .form-label {
+        font-weight: 500;
+        color: #ffffff; 
+    }
+
+    /* Поля ввода */
+    .form-control {
+        background-color: #222436;
+        border: none;
+        color: #fff; 
+        border-radius: 10px;
+        padding: 10px 15px;
+    }
+
+        /* Плейсхолдеры внутри полей */
+        .form-control::placeholder {
+            color: #fff !important;
+            opacity: 0.7;
+        }
+
+        /* Фокус на поле ввода */
+        .form-control:focus {
+            background-color: #2a2c40;
+            border-color: #ffffff;
+            color: white;
+            box-shadow: 0 0 0 0.2rem rgba(76, 201, 240, 0.25);
+        }
+
+    /* Подсказки и ссылки */
+    .form-text a {
+        color: #ffffff;
+        transition: color 0.3s ease;
+    }
+
+        .form-text a:hover {
+            color: #ffffff;
+        }
+
+    /* Сообщения об ошибках */
+    .alert-danger {
+        background-color: #ff4444;
+        color: white;
+        border: none;
+        border-radius: 10px;
+    }
+
+    /* Кнопка входа */
+    .btn-primary {
+        background-color: #4cc9f0;
+        border: none;
+        font-weight: bold;
+        padding: 10px 0;
+        font-size: 1.1rem;
+        border-radius: 10px;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-primary:hover {
+            background-color: #3aa7cc;
+        }
+
+    /* Ссылка регистрации */
+    .text-center a {
+        color: #4cc9f0;
+        font-weight: bold;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+        .text-center a:hover {
+            color: #3aa7cc;
+        }
+
+    /* Цвет текста "Ещё нет аккаунта?" */
+    .text-center p {
+        color: #ffffff; /* Теперь белый, как и у лейблов */
+    }
+
+    /* Адаптивность */
+    @media (max-width: 576px) {
+        .card-body-login {
+            padding: 1.5rem;
+        }
+    }
+</style>
+
+<div class="container mt-5 py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm">
+                <div class="card-body-login">
+                    <h2 class="text-center mb-4">
+                        <i class="fas fa-sign-in-alt me-2 text-primary"></i>{{ title }}
+                    </h2>
+
+                    <form action="{% url 'login' %}" method="post">
+                        {% csrf_token %}
+
+                        <!-- Поле логина -->
+                        <div class="mb-3">
+                            <label for="id_username" class="form-label">
+                                <i class="fas fa-user me-1"></i>Логин
+                            </label>
+                            {{ form.username }}
+                        </div>
+
+                        <!-- Поле пароля -->
+                        <div class="mb-3">
+                            <label for="id_password" class="form-label">
+                                <i class="fas fa-lock me-1"></i>Пароль
+                            </label>
+                            {{ form.password }}
+                            <div class="form-text">
+                                <a href="{% url 'password_reset' %}" class="text-decoration-none">
+                                    <i class="fas fa-question-circle me-1"></i>Забыли пароль?
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Ошибки формы -->
+                        {% if form.errors %}
+                        <div class="alert alert-danger d-flex align-items-center" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Неверный логин или пароль.
+                        </div>
+                        {% endif %}
+
+                        <!-- Кнопка входа -->
+                        <div class="d-grid mb-3">
+                            <input type="hidden" name="next" value="/" />
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt me-1"></i>Войти
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Регистрация -->
+                    <div class="text-center">
+                        <p class="mb-0">
+                            Ещё нет аккаунта?
+                            <a href="{% url 'register' %}" class="text-decoration-none">
+                                <i class="fas fa-user-plus me-1"></i>Зарегистрироваться
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

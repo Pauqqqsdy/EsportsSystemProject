@@ -1,0 +1,196 @@
+{% extends "app/layout.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+    /* Градиентный фон карточки */
+    .card-body-edit-team {
+        background: linear-gradient(145deg, #1a1a2e, #161b2e);
+        border-radius: 10px;
+        padding: 2rem;
+    }
+
+        .card-body-edit-team h4 {
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 2rem;
+        }
+        .card-body-edit-team h5 {
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 2rem;
+        }
+
+
+    /* Тень под карточкой */
+    .card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Заголовок формы */
+    .card-header h4 {
+        font-weight: bold;
+        color: #ffffff;
+    }
+
+    /* Лейблы форм */
+    .form-label {
+        font-weight: 500;
+        color: #ffffff;
+    }
+
+    /* Поля ввода */
+    .form-control {
+        background-color: #222436;
+        border: none;
+        color: #fff;
+        border-radius: 10px;
+        padding: 10px 15px;
+    }
+
+        /* Плейсхолдеры внутри полей */
+        .form-control::placeholder {
+            color: #fff !important;
+            opacity: 0.7;
+        }
+
+        /* Фокус на поле ввода */
+        .form-control:focus {
+            background-color: #2a2c40;
+            border-color: #ffffff;
+            color: white;
+            box-shadow: 0 0 0 0.2rem rgba(76, 201, 240, 0.25);
+        }
+     .form-control-file{
+         color: #ffffff;
+     }
+    img[alt] {
+        border: 2px solid #4cc9f0; 
+    }
+
+        img[alt]:hover {
+            transform: scale(1.05);
+        }
+
+        img[alt]:invalid {
+            background-color: rgba(255, 255, 255, 0.1); 
+            color: #ffffff;
+        }
+
+        img[alt]:empty {
+            background-color: rgba(255, 255, 255, 0.1); 
+            color: #ffffff;
+
+        }
+
+    /* Подсказки */
+    .form-text {
+        color: #ffffff;
+        font-size: 0.9rem;
+    }
+
+    /* Кнопка сохранить */
+    .btn-primary {
+        background-color: #4cc9f0;
+        border: none;
+        font-weight: bold;
+        padding: 10px 20px;
+        font-size: 1rem;
+        border-radius: 10px;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-primary:hover {
+            background-color: #3aa7cc;
+        }
+
+    /* Кнопка отмены */
+    .btn-outline-secondary {
+        color: #ffffff;
+        border: 1px solid #ffffff;
+        background-color: transparent;
+        font-weight: bold;
+        padding: 10px 20px;
+        font-size: 1rem;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-outline-secondary:hover {
+            background-color: #2a2c40;
+        }
+
+    /* Аватар */
+    .img-fluid.rounded-circle {
+        border: 2px solid #4cc9f0;
+        transition: transform 0.3s ease;
+    }
+
+        .img-fluid.rounded-circle:hover {
+            transform: scale(1.05);
+        }
+
+
+    /* Адаптивность */
+    @media (max-width: 576px) {
+        .card-body-edit-profile {
+            padding: 1.5rem;
+        }
+    }
+</style>
+
+<<div class="container mt-5 py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-body card-body-edit-team">
+                    <h4 class="mb-4">
+                        <i class="fas fa-users-cog me-2 text-primary"></i>Редактирование команды
+                    </h4>
+
+                    <!-- Отображение текущего аватара -->
+                    <div class="text-center mb-3">
+                        <h5 class="mb-3">
+                            <i class="fas fa-image me-2"></i>Текущий аватар команды:
+                        </h5>
+                        <img src="{% if team.avatar %}{{ team.avatar.url }}{% else %}{% static 'team_avatars/default.jpg' %}{% endif %}"
+                             alt="Аватар команды"
+                             class="img-fluid rounded-circle mb-4"
+                             style="width: 150px; height: 150px; object-fit: cover;">
+                    </div>
+
+                    <!-- Форма редактирования команды -->
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <!-- Название команды -->
+                        <div class="mb-3">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">Название команды:</label>
+                            {{ form.name }}
+                        </div>
+
+                        <!-- Аватар команды -->
+                        <div class="mb-3">
+                            <label for="{{ form.avatar.id_for_label }}" class="form-label">Аватар команды:</label>
+                            {{ form.avatar }}
+                        </div>
+
+                        <!-- Кнопки -->
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a href="{% url 'team_page' team_id=team.id %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i>Отмена
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Сохранить
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

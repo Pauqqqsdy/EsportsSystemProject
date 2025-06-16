@@ -1,0 +1,141 @@
+{% extends "app/layout.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+    /* Градиентный фон контейнера */
+    .agreement-container {
+        background: linear-gradient(145deg, #1a1a2e, #161b2e);
+        border-radius: 10px;
+        padding: 2rem;
+    }
+
+    /* Тень под карточкой */
+    .card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Заголовок страницы */
+    h1 {
+        color: #ffffff;
+        font-weight: bold;
+    }
+
+    /* Подзаголовки разделов */
+    h4.text-primary {
+        color: #4cc9f0 !important;
+    }
+
+    /* Основной текст */
+    p {
+        color: #ffffff;
+    }
+
+    /* Отступ для текста под заголовками */
+    .ms-4 {
+        margin-left: 2rem;
+    }
+
+    /* Кнопка */
+    .btn-primary {
+        background-color: #4cc9f0;
+        border: none;
+        font-weight: bold;
+        padding: 10px 20px;
+        font-size: 1.1rem;
+        border-radius: 10px;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-primary:hover {
+            background-color: #3aa7cc;
+        }
+
+    /* Алерт (инфо) */
+    .alert-info {
+        background-color: #2a2c40;
+        color: #ffffff;
+        border: none;
+        border-radius: 10px;
+    }
+
+        .alert-info i {
+            color: #4cc9f0;
+        }
+
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .agreement-container {
+            padding: 1.5rem;
+        }
+    }
+</style>
+
+<div class="container mt-5 py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center mb-4">
+                <i class="fas fa-file-contract fa-2x text-primary me-3"></i>
+                <h1 class="mb-0">Пользовательское соглашение</h1>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body agreement-container">
+                    <div class="mb-4">
+                        <h4 class="text-primary">
+                            <i class="fas fa-info-circle me-2"></i>1. Общие положения
+                        </h4>
+                        <p class="ms-4">
+                            1.1. Настоящее Соглашение регулирует отношения между Администрацией сайта ZXC.Tournament и Пользователем.
+                        </p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h4 class="text-primary">
+                            <i class="fas fa-user-check me-2"></i>2. Обязанности пользователя
+                        </h4>
+                        <p class="ms-4">
+                            2.1. Пользователь обязуется не нарушать правила поведения на сайте и не использовать его для противоправных действий.
+                        </p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h4 class="text-primary">
+                            <i class="fas fa-trophy me-2"></i>3. Условия участия в турнирах
+                        </h4>
+                        <p class="ms-4">
+                            3.1. Участие в турнирах требует соблюдения всех правил конкретного турнира.
+                        </p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h4 class="text-primary">
+                            <i class="fas fa-shield-alt me-2"></i>4. Ответственность
+                        </h4>
+                        <p class="ms-4">
+                            4.1. Администрация не несёт ответственности за действия пользователей на платформе.
+                        </p>
+                    </div>
+
+                    <div class="alert alert-info d-flex align-items-center mt-4" role="alert">
+                        <i class="fas fa-calendar-alt me-2"></i>
+                        <div>
+                            <strong>Дата последнего обновления: 14.06.2025</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="{% url 'home' %}" class="btn btn-primary">
+                    <i class="fas fa-home me-2"></i>Вернуться на главную
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

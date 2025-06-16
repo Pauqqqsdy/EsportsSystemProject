@@ -1,0 +1,173 @@
+{% extends "app/layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-calendar-edit fa-2x text-primary me-3"></i>
+            <h1 class="mb-0">Изменить время матча</h1>
+        </div>
+        <a href="{% url 'match_detail' tournament.id match.id %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>К матчу
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-gamepad me-2"></i>
+                        {{ match.team1.name }} vs {{ match.team2.name }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Информация о матче -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="text-center">
+                                <h4>{{ match.team1.name }}</h4>
+                                {% if match.team1.avatar %}
+                                <img src="{{ match.team1.avatar.url }}"
+                                     alt="{{ match.team1.name }}"
+                                     class="rounded-circle mb-2"
+                                     width="60" height="60">
+                                {% else %}
+                                <div class="bg-primary rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
+                                     style="width: 60px; height: 60px;">
+                                    <i class="fas fa-users text-white"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-center">
+                                <h4>{{ match.team2.name }}</h4>
+                                {% if match.team2.avatar %}
+                                <img src="{{ match.team2.avatar.url }}"
+                                     alt="{{ match.team2.name }}"
+                                     class="rounded-circle mb-2"
+                                     width="60" height="60">
+                                {% else %}
+                                <div class="bg-secondary rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
+                                     style="width: 60px; height: 60px;">
+                                    <i class="fas fa-users text-white"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mb-4">
+                        {% if match_type == 'bracket' %}
+                        <span class="badge bg-info fs-6">{{ match.stage.name }}</span>
+                        <span class="badge bg-secondary fs-6 ms-2">{{ match.stage.get_format_display }}</span>
+                        {% else %}
+                        <span class="badge bg-success fs-6">Round Robin</span>
+                        {% endif %}
+                        {% if match.scheduled_time %}
+                        <span class="badge bg-warning fs-6 ms-2">
+                            Текущее время: {{ match.scheduled_time|date:"d.m.Y H:i" }}
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Форма изменения времени -->
+                    <form method="post">
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                        {% endif %}
+
+                        <div class="form-group mb-4">
+                            <label for="{{ form.scheduled_time.id_for_label }}" class="form-label fw-bold">
+                                {{ form.scheduled_time.label }}
+                            </label>
+                            {{ form.scheduled_time }}
+                            {% if form.scheduled_time.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.scheduled_time.errors }}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Введите дату и время в формате: ГГГГ-ММ-ДД ЧЧ:ММ (например: 2023-12-25 15:30)
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'match_detail' tournament.id match.id %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i>Отмена
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Сохранить время
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card bg-light">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Рекомендации по расписанию
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="small mb-3">
+                        <li>Учитывайте часовые пояса участников</li>
+                        <li>Оставляйте достаточно времени между матчами</li>
+                        <li>Планируйте паузы для технических вопросов</li>
+                        <li>Уведомляйте команды об изменениях заранее</li>
+                    </ul>
+
+                    <hr class="my-3">
+
+                    <p class="small text-muted mb-0">
+                        <i class="fas fa-lightbulb me-1"></i>
+                        Команды получат уведомление об изменении времени
+                    </p>
+                </div>
+            </div>
+
+            {% if match.winner %}
+            <div class="card mt-3 border-success">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-trophy me-2"></i>
+                        Матч завершен
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">
+                        <strong>Победитель:</strong> {{ match.winner.name }}
+                    </p>
+                    {% if match.team1_score is not None and match.team2_score is not None %}
+                    <p class="mb-0">
+                        <strong>Счет:</strong> {{ match.team1_score }} - {{ match.team2_score }}
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dateTimeInput = document.getElementById('{{ form.scheduled_time.id_for_label }}');
+    if (dateTimeInput) {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        dateTimeInput.min = now.toISOString().slice(0, 16);
+    }
+});
+</script>
+{% endblock %}

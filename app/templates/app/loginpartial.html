@@ -1,0 +1,25 @@
+﻿{% if user.is_authenticated %}
+<ul class="navbar-nav ms-auto">
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'profile' %}">
+            <i class="fas fa-user me-1"></i>Мой профиль
+        </a>
+    </li>
+    <li class="nav-item">
+        <form id="logoutForm" action="/logout/" method="post" class="d-inline">
+            {% csrf_token %}
+            <a class="nav-link" href="javascript:document.getElementById('logoutForm').submit()">
+                <i class="fas fa-sign-out-alt me-1"></i>Выйти
+            </a>
+        </form>
+    </li>
+</ul>
+{% else %}
+<ul class="navbar-nav ms-auto">
+    <li class="nav-item">
+        <a class="nav-link btn-login" href="{% url 'login' %}">
+            <i class="fas fa-sign-in-alt me-1"></i>Войти
+        </a>
+    </li>
+</ul>
+{% endif %}

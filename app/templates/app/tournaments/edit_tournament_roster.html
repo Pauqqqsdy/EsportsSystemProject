@@ -1,0 +1,72 @@
+{% extends "app/layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-users me-2"></i>
+                        Изменение состава команды
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <h5 class="alert-heading">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Информация о турнире
+                        </h5>
+                        <p class="mb-0">
+                            <strong>Турнир:</strong> {{ tournament.name }}<br>
+                            <strong>Команда:</strong> {{ team.name }}<br>
+                            <strong>Формат:</strong> {{ tournament.get_game_format_display }}
+                        </p>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        {% if form.players %}
+                        <div class="mb-4">
+                            <label for="{{ form.players.id_for_label }}" class="form-label">
+                                <i class="fas fa-user-friends me-2"></i>
+                                Выберите игроков:
+                            </label>
+                            {{ form.players }}
+                            {% if form.players.help_text %}
+                            <div class="form-text">{{ form.players.help_text }}</div>
+                            {% endif %}
+                            {% if form.players.errors %}
+                            <div class="text-danger">
+                                {% for error in form.players.errors %}
+                                <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {% for error in form.non_field_errors %}
+                            <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'tournament_detail' tournament_id=tournament.id %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i>Отмена
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Сохранить изменения
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,318 @@
+{% extends "app/layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-table fa-2x text-primary me-3"></i>
+            <div>
+                <h1 class="mb-0">Турнирная таблица</h1>
+                <p class="text-muted mb-0">{{ tournament.name }}</p>
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'tournament_detail' tournament.id %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Назад к турниру
+            </a>
+            {% if is_creator and not table %}
+            <a href="{% url 'generate_bracket' tournament_id=tournament.id %}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>Сформировать таблицу
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if table %}
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Таблица команд -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-trophy me-2 text-warning"></i>
+                        Таблица команд
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th class="text-center">#</th>
+                                    <th>Команда</th>
+                                    <th class="text-center">И</th>
+                                    <th class="text-center">П</th>
+                                    <th class="text-center">Пр</th>
+                                    <th class="text-center">О</th>
+                                    <th class="text-center">%</th>
+                                    <th class="text-center">Разн. карт</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for result in table.results.all %}
+                                <tr>
+                                    <td class="text-center fw-bold">{{ forloop.counter }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if tournament.game_format == '1x1' and result.team.players.first %}
+                                            <a href="{% url 'view_profile' result.team.players.first.user.username %}"
+                                               class="text-decoration-none fw-bold">
+                                                {{ result.team.name }}
+                                            </a>
+                                            {% else %}
+                                            <a href="{% url 'team_page' result.team.id %}"
+                                               class="text-decoration-none fw-bold">
+                                                {{ result.team.name }}
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td class="text-center">{{ result.matches_played }}</td>
+                                    <td class="text-center text-success fw-bold">{{ result.wins }}</td>
+                                    <td class="text-center text-danger">{{ result.losses }}</td>
+                                    <td class="text-center text-primary fw-bold">{{ result.points }}</td>
+                                    <td class="text-center">{{ result.get_win_rate }}%</td>
+                                    <td class="text-center">{{ result.map_difference }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted py-4">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Результаты еще не доступны
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Матчи -->
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-gamepad me-2 text-info"></i>
+                        Матчи
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for match in table.matches.all %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card {% if match.is_completed %}border-success{% else %}border-warning{% endif %}">
+                                <div class="card-body p-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar me-1"></i>
+                                            {% if match.scheduled_time %}
+                                            {{ match.scheduled_time|date:"d.m.Y H:i" }}
+                                            {% else %}
+                                            Время не назначено
+                                            {% endif %}
+                                        </small>
+                                        <span class="badge {% if match.is_completed %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                                            {{ match.get_format_display }}
+                                        </span>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="text-center flex-fill">
+                                            {% if tournament.game_format == '1x1' and match.team1.players.first %}
+                                            <a href="{% url 'view_profile' match.team1.players.first.user.username %}" class="text-decoration-none">
+                                                <div class="fw-bold">{{ match.team1.name }}</div>
+                                            </a>
+                                            {% else %}
+                                            <div class="fw-bold">{{ match.team1.name }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="mx-3">
+                                            {% if match.is_completed %}
+                                            <span class="badge bg-primary fs-6">
+                                                {{ match.get_score_display }}
+                                            </span>
+                                            {% elif is_creator %}
+                                            <form method="post" action="{% url 'round_robin_match_result' tournament.id match.id %}" class="d-inline-flex align-items-center gap-1">
+                                                {% csrf_token %}
+                                                {% if match.format == 'BO1' %}
+                                                <select name="bo1_score" class="form-select form-select-sm" style="width: 110px;">
+                                                    <option value="1-0">1-0</option>
+                                                    <option value="0-1">0-1</option>
+                                                </select>
+                                                {% elif match.format == 'BO3' %}
+                                                <select name="bo3_score" class="form-select form-select-sm" style="width: 110px;">
+                                                    <option value="2-0">2-0</option>
+                                                    <option value="0-2">0-2</option>
+                                                    <option value="2-1">2-1</option>
+                                                    <option value="1-2">1-2</option>
+                                                </select>
+                                                {% elif match.format == 'BO5' %}
+                                                <select name="bo5_score" class="form-select form-select-sm" style="width: 110px;">
+                                                    <option value="3-0">3-0</option>
+                                                    <option value="0-3">0-3</option>
+                                                    <option value="3-1">3-1</option>
+                                                    <option value="1-3">1-3</option>
+                                                    <option value="3-2">3-2</option>
+                                                    <option value="2-3">2-3</option>
+                                                </select>
+                                                {% endif %}
+                                                <button type="submit" class="btn btn-success btn-sm ms-2">Сохранить</button>
+                                            </form>
+                                            <div class="form-text mt-1 text-center">
+                                                {% if match.format == 'BO1' %}
+                                                Доступно: 1-0 или 0-1
+                                                {% elif match.format == 'BO3' %}
+                                                Доступно: 2-0, 0-2, 2-1 или 1-2
+                                                {% elif match.format == 'BO5' %}
+                                                Доступно: 3-0, 0-3, 3-1, 1-3, 3-2 или 2-3
+                                                {% endif %}
+                                            </div>
+                                            {% else %}
+                                            <span class="text-muted">vs</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="text-center flex-fill">
+                                            {% if tournament.game_format == '1x1' and match.team2.players.first %}
+                                            <a href="{% url 'view_profile' match.team2.players.first.user.username %}" class="text-decoration-none">
+                                                <div class="fw-bold">{{ match.team2.name }}</div>
+                                            </a>
+                                            {% else %}
+                                            <div class="fw-bold">{{ match.team2.name }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="col-12">
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-info-circle fa-2x mb-3 d-block"></i>
+                                Матчи еще не созданы
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Информация о турнире -->
+            <div class="card bg-light mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Информация о турнире
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>Дисциплина:</strong> {{ tournament.discipline }}</p>
+                    <p><strong>Формат игр:</strong> {{ tournament.game_format }}</p>
+                    <p><strong>Команд:</strong> {{ tournament.registered_teams_count }}/{{ tournament.max_teams }}</p>
+                    <p>
+                        <strong>Статус:</strong>
+                        <span class="badge
+                                {% if tournament.get_status == 'planned' %}bg-secondary
+                                {% elif tournament.get_status == 'in_progress' %}bg-warning text-dark
+                                {% elif tournament.get_status == 'completed' %}bg-success
+                                {% endif %}">
+                            {{ tournament.get_status_display }}
+                        </span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Предстоящие матчи -->
+            {% if upcoming_matches %}
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-clock me-2"></i>
+                        Предстоящие матчи
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for match in upcoming_matches %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    {% if tournament.game_format == '1x1' and match.team1.players.first and match.team2.players.first %}
+                                    <a href="{% url 'view_profile' match.team1.players.first.user.username %}" class="text-decoration-none">
+                                        <div class="fw-bold">{{ match.team1.name }}</div>
+                                    </a>
+                                    <a href="{% url 'view_profile' match.team2.players.first.user.username %}" class="text-decoration-none">
+                                        <div class="fw-bold">{{ match.team2.name }}</div>
+                                    </a>
+                                    {% else %}
+                                    <div class="fw-bold">{{ match.team1.name }}</div>
+                                    <div class="fw-bold">{{ match.team2.name }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="text-end">
+                                    <div class="text-muted small">
+                                        {{ match.scheduled_time|date:"d.m.Y" }}
+                                    </div>
+                                    <div class="text-muted small">
+                                        {{ match.scheduled_time|date:"H:i" }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Легенда -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-question-circle me-2"></i>
+                        Обозначения
+                    </h6>
+                </div>
+                <div class="card-body small">
+                    <p class="mb-2"><strong>И</strong> - Игр сыграно</p>
+                    <p class="mb-2"><strong>П</strong> - Побед</p>
+                    <p class="mb-2"><strong>Пр</strong> - Поражений</p>
+                    <p class="mb-2"><strong>О</strong> - Очков</p>
+                    <p class="mb-0"><strong>%</strong> - Процент побед</p>
+                </div>
+            </div>
+
+            {% if tournament.status == 'scheduled' and tournament.organizer == request.user %}
+            <div class="mb-4">
+                {% if not tournament.round_robin_matches.exists and not tournament.bracket %}
+                <form method="post" action="{% url 'generate_round_robin' tournament.id %}" class="mb-3">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="match_format" class="form-label">Формат игр</label>
+                        <select name="match_format" id="match_format" class="form-select" required>
+                            <option value="BO1">BO1</option>
+                            <option value="BO3">BO3</option>
+                            <option value="BO5">BO5</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Сформировать турнирную сетку</button>
+                </form>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-table fa-3x text-muted mb-3"></i>
+        <h3 class="text-muted">Турнирная таблица еще не создана</h3>
+        {% if is_creator %}
+        <p class="text-muted">Нажмите кнопку "Сформировать таблицу" для создания турнирной сетки</p>
+        {% else %}
+        <p class="text-muted">Ожидайте создания турнирной таблицы организатором</p>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

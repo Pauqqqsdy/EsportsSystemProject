@@ -1,0 +1,218 @@
+{% extends "app/layout.html" %}
+{% block content %}
+
+<style>
+    /* Градиентный фон контейнера */
+    .profile-container {
+        background: linear-gradient(145deg, #1a1a2e, #161b2e);
+        border-radius: 10px;
+        padding: 2rem;
+    }
+
+    /* Тень под карточкой */
+    .card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        background-color: #1f2033;
+    }
+
+    /* Заголовок страницы */
+    h4 {
+        color: #ffffff;
+    }
+
+    /* Текст внутри карточки */
+    .card-body, .card-text, .card-title {
+        color: #ffffff;
+    }
+
+    /* Заголовок карточки */
+    .card-header {
+        background-color: #1f2033;
+        color: #ffffff;
+    }
+
+    /* Аватар */
+    .img-fluid.rounded-circle {
+        border: 2px solid #4cc9f0;
+        transition: transform 0.3s ease;
+    }
+
+        .img-fluid.rounded-circle:hover {
+            transform: scale(1.05);
+        }
+
+    /* Линковка в команде */
+    a.text-decoration-none {
+        color: #4cc9f0;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+        a.text-decoration-none:hover {
+            color: #3aa7cc;
+        }
+
+    /* Метки (Email, О себе и т.п.) */
+    strong {
+        color: #4cc9f0;
+    }
+
+    /* Кнопки */
+    .btn-primary {
+        background-color: #4cc9f0;
+        border: none;
+        font-weight: bold;
+        padding: 10px 20px;
+        font-size: 1rem;
+        border-radius: 10px;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-primary:hover {
+            background-color: #3aa7cc;
+        }
+
+    .btn-outline-warning {
+        color: #ffd43b;
+        border-color: #ffd43b;
+        font-weight: bold;
+        padding: 10px 20px;
+        font-size: 1rem;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-outline-warning:hover {
+            background-color: #ffd43b;
+            color: #000;
+        }
+
+    .btn-success {
+        background-color: #4cc9f0;
+        border: none;
+        font-weight: bold;
+        padding: 5px 15px;
+        font-size: 0.95rem;
+        border-radius: 8px;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-success:hover {
+            background-color: #3aa7cc;
+        }
+
+    /* Серый текст */
+    .text-muted {
+        color: #bbbbbb !important;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .profile-container {
+            padding: 1.5rem;
+        }
+    }
+</style>
+
+<div class="container mt-5 py-4">
+    <div class="row">
+        <!-- Левая колонка с аватаром -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm profile-container">
+                <div class="card-body text-center">
+                    <img src="{{ profile.avatar.url }}" alt="Аватар"
+                         class="img-fluid rounded-circle mb-4"
+                         style="width: 150px; height: 150px; object-fit: cover;">
+                    <h5 class="card-title">{{ profile_user.username }}</h5>
+                    {% if profile.team %}
+                    <p class="card-text">
+                        <i class="fas fa-users me-1 text-primary"></i>
+                        <a href="{% url 'team_page' team_id=profile.team.id %}"
+                           class="text-decoration-none">{{ profile.team.name }}</a>
+                    </p>
+                    {% else %}
+                    <p class="text-muted">
+                        <i class="fas fa-user me-1"></i>
+                        Не состоит в команде
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Правая колонка с информацией -->
+        <div class="col-md-8">
+            <div class="card shadow-sm profile-container">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-circle me-2 text-primary"></i>
+                        Информация о пользователе
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if is_owner %}
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <strong><i class="fas fa-envelope me-1"></i>Email:</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            {{ profile_user.email }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if profile.bio %}
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <strong><i class="fas fa-info-circle me-1"></i>О себе:</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            {{ profile.bio }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <strong><i class="fas fa-users me-1"></i>Команда:</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            {% if profile.team %}
+                            <a href="{% url 'team_page' team_id=profile.team.id %}"
+                               class="text-decoration-none">
+                                <i class="fas fa-external-link-alt me-1"></i>
+                                {{ profile.team.name }}
+                            </a>
+                            {% else %}
+                            <span class="text-muted">Не состоит в команде</span>
+                            {% if is_owner %}
+                            <div class="mt-2">
+                                <a href="{% url 'create_team' %}" class="btn btn-success btn-sm">
+                                    <i class="fas fa-plus me-1"></i>Создать команду
+                                </a>
+                            </div>
+                            {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if is_owner %}
+                    <hr style="border-color: #444;">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'edit_profile' %}" class="btn btn-primary">
+                            <i class="fas fa-edit me-1"></i>Редактировать профиль
+                        </a>
+                        <a href="{% url 'change_password' %}" class="btn btn-outline-warning">
+                            <i class="fas fa-key me-1"></i>Сменить пароль
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

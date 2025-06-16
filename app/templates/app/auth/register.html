@@ -1,0 +1,327 @@
+{% extends "app/layout.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+    /* Градиентный фон карточки */
+    .card-body-register {
+        background: linear-gradient(145deg, #1a1a2e, #161b2e);
+        border-radius: 10px;
+        padding: 2rem;
+    }
+
+    /* Тень под карточкой */
+    .card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Заголовок формы */
+    .card-body-register h2 {
+        font-weight: bold;
+        color: #ffffff;
+    }
+
+    /* Лейблы форм */
+    .form-label {
+        font-weight: 500;
+        color: #ffffff;
+    }
+
+    /* Поля ввода */
+    .form-control {
+        background-color: #222436;
+        border: none;
+        color: #fff;
+        border-radius: 10px;
+        padding: 10px 15px;
+    }
+
+        /* Плейсхолдеры внутри полей */
+        .form-control::placeholder {
+            color: #fff !important;
+            opacity: 0.7;
+        }
+
+        /* Фокус на поле ввода */
+        .form-control:focus {
+            background-color: #2a2c40;
+            border-color: #ffffff;
+            color: white;
+            box-shadow: 0 0 0 0.2rem rgba(76, 201, 240, 0.25);
+        }
+
+    /* Подсказки и ссылки */
+    .form-text {
+        color: #ffffff; /* Белый цвет */
+        font-size: 0.9rem;
+    }
+
+    /* Сообщения об ошибках */
+    .alert-danger {
+        background-color: #ff4444;
+        color: white;
+        border: none;
+        border-radius: 10px;
+    }
+
+    /* Инвалидные поля */
+    .invalid-feedback {
+        color: #ffcccc;
+        font-size: 0.9rem;
+    }
+
+    /* Кнопка регистрации */
+    .btn-primary {
+        background-color: #4cc9f0;
+        border: none;
+        font-weight: bold;
+        padding: 10px 0;
+        font-size: 1.1rem;
+        border-radius: 10px;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-primary:hover {
+            background-color: #3aa7cc;
+        }
+
+    /* Ссылка входа */
+    .text-center a {
+        color: #4cc9f0;
+        font-weight: bold;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+        .text-center a:hover {
+            color: #3aa7cc;
+        }
+
+    /* Цвет текста "Уже есть аккаунт?" */
+    .text-center p {
+        color: #ffffff;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 576px) {
+        .card-body-register {
+            padding: 1.5rem;
+        }
+    }
+
+    .form-check-label {
+        color: #ffffff;
+    }
+
+        .form-check-label a {
+            color: #4cc9f0;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+
+            .form-check-label a:hover {
+                color: #3aa7cc;
+            }
+</style>
+
+<div class="container mt-5 py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-body-register">
+                    <h2 class="text-center mb-4">
+                        <i class="fas fa-user-plus me-2 text-primary"></i>Регистрация
+                    </h2>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Ошибки формы -->
+                        {% if form.errors %}
+                        <div class="alert alert-danger d-flex align-items-center" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Исправьте ошибки:</strong>
+                            {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                            <div>{{ error }}</div>
+                            {% endfor %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Логин -->
+                        <div class="mb-3">
+                            <label for="id_username" class="form-label">
+                                <i class="fas fa-user me-1"></i>Логин
+                            </label>
+                            {{ form.username }}
+                            {% if form.username.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.username.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Максимум 16 символов. Только латинские буквы и цифры.
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="id_email" class="form-label">
+                                <i class="fas fa-envelope me-1"></i>Email
+                            </label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.email.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">
+                                <i class="fas fa-bell me-1"></i>
+                                На этот адрес будут приходить уведомления
+                            </div>
+                        </div>
+
+                        <!-- Пароль -->
+                        <div class="mb-3">
+                            <label for="id_password1" class="form-label">
+                                <i class="fas fa-lock me-1"></i>Пароль
+                            </label>
+                            {{ form.password1 }}
+                            {% if form.password1.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.password1.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">
+                                <i class="fas fa-shield-alt me-1"></i>
+                                Пароль должен содержать минимум 8 символов и не быть слишком простым.
+                            </div>
+                        </div>
+
+                        <!-- Подтверждение пароля -->
+                        <div class="mb-3">
+                            <label for="id_password2" class="form-label">
+                                <i class="fas fa-lock me-1"></i>Подтверждение пароля
+                            </label>
+                            {{ form.password2 }}
+                            {% if form.password2.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.password2.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Политика конфиденциальности -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                {{ form.privacy_policy }}
+                                <label class="form-check-label" for="id_privacy_policy">
+                                    Я согласен с
+                                    <a href="{% url 'privacy_policy' %}" target="_blank" class="text-decoration-none">
+                                        политикой конфиденциальности
+                                    </a>
+                                    и
+                                    <a href="{% url 'service_terms' %}" target="_blank" class="text-decoration-none">
+                                        пользовательским соглашением
+                                    </a>
+                                </label>
+                                {% if form.privacy_policy.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.privacy_policy.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Кнопка регистрации -->
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-user-plus me-1"></i>Зарегистрироваться
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Вход -->
+                    <div class="text-center">
+                        <p class="mb-0">
+                            Уже есть аккаунт?
+                            <a href="{% url 'login' %}" class="text-decoration-none">
+                                <i class="fas fa-sign-in-alt me-1"></i>Войти
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const usernameField = document.getElementById('id_username');
+        if (usernameField) {
+            usernameField.addEventListener('input', function () {
+                this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
+                if (this.value.length > 16) {
+                    this.value = this.value.substring(0, 16);
+                }
+            });
+        }
+
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function (e) {
+                let isValid = true;
+
+                const requiredFields = form.querySelectorAll('[required]');
+                requiredFields.forEach(field => {
+                    field.classList.remove('is-invalid');
+                    const feedback = field.nextElementSibling;
+                    if (feedback && feedback.classList.contains('invalid-feedback')) {
+                        feedback.remove();
+                    }
+
+                    if ((field.type !== 'checkbox' && !field.value.trim()) ||
+                        (field.type === 'checkbox' && !field.checked)) {
+                        isValid = false;
+                        field.classList.add('is-invalid');
+
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'invalid-feedback';
+
+                        const fieldMessages = {
+                            'id_username': 'Логин обязателен для заполнения',
+                            'id_email': 'Email обязателен для заполнения',
+                            'id_password1': 'Пароль обязателен для заполнения',
+                            'id_password2': 'Пожалуйста, подтвердите пароль',
+                            'id_privacy_policy': 'Требуется принять условия соглашения и ознакомиться с политикой конфиденциальности'
+                        };
+
+                        errorDiv.textContent = fieldMessages[field.id] || 'Это поле обязательно для заполнения';
+                        field.parentNode.insertBefore(errorDiv, field.nextSibling);
+                    }
+                });
+
+                if (!isValid) {
+                    e.preventDefault();
+                }
+            });
+        }
+    });
+</script>
+
+{% endblock %}

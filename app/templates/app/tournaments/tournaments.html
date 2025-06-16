@@ -1,0 +1,278 @@
+﻿{% extends "app/layout.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Боковая панель */
+    .sidebar {
+        background-color: #16213e;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+
+        .sidebar h5 {
+            color: #e6e6e6;
+            margin-bottom: 1.5rem;
+        }
+
+    .form-control {
+        background-color: #2d2d42;
+        border: none;
+        color: #e6e6e6;
+    }
+
+        .form-control:focus {
+            background-color: #2d2d42;
+            color: #e6e6e6;
+            box-shadow: 0 0 0 2px rgba(79, 151, 255, 0.3);
+        }
+
+    .filter-group {
+        margin-top: 10px;
+    }
+
+    /* Кнопки */
+    .btn-primary {
+        background-color: #4cc9f0;
+        color: white;
+        border-radius: 20px;
+        padding: 10px 16px;
+        font-weight: bold;
+        width: 100%;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-primary:hover {
+            background-color: #3aa7cc;
+        }
+
+    .btn-outline-secondary {
+        color: #4cc9f0;
+        border-color: #4cc9f0;
+        margin-top: 10px;
+        width: 100%;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-outline-secondary:hover {
+            background-color: #4cc9f0;
+            color: white;
+        }
+
+    /* Карточка турнира */
+    .tournament-card {
+        background-color: #1a1a2e;
+        border-left: 4px solid #4cc9f0;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+    }
+
+        .tournament-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+    .tournaments-container {
+        background: linear-gradient(145deg, #1a1a2e, #161b2e, #0f0f1c);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 0 20px rgba(76, 201, 240, 0.1);
+    }
+
+    .tournament-img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        background-color: #2d2d42;
+    }
+
+    .tournament-body {
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .tournament-title {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+    }
+
+    .tournament-meta {
+        color: #a8a8a8;
+        font-size: 0.9rem;
+    }
+
+    .tournament-tag {
+        display: inline-block;
+        background-color: #4cc9f033;
+        color: #4cc9f0;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+    }
+
+    /* Статус турнира */
+    .status-badge {
+        font-size: 0.85rem;
+        font-weight: bold;
+        padding: 4px 10px;
+        border-radius: 6px;
+    }
+
+    .status-upcoming {
+        background-color: #ff9800;
+    }
+
+    .status-in-progress {
+        background-color: #4caf50;
+    }
+
+    .status-completed {
+        background-color: #9e9e9e;
+    }
+
+    .tournament-date {
+        color: #4cc9f0 !important;
+        font-size: 0.9rem;
+        font-weight: bold;
+    }
+
+    /* Иконка игры */
+    .tournament-game-icon {
+        width: 30px;
+        height: 30px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .apply-button-wrapper {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    p.text-muted {
+        color: #e6e6e6 !important
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Боковая панель -->
+        <div class="col-md-3 sidebar p-4">
+            <h5 class="text-white">Фильтры</h5>
+            <form method="get" class="mt-3">
+                <div class="mb-3">
+                    <label for="discipline" class="form-label">Дисциплина</label>
+                    <select name="discipline" id="discipline" class="form-control">
+                        <option value="">Все</option>
+                        {% for value, name in disciplines %}
+                        <option value="{{ value }}" {% if selected_discipline and selected_discipline == value %}selected{% endif %}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="game_format" class="form-label">Формат</label>
+                    <select name="game_format" id="game_format" class="form-control">
+                        <option value="">Все</option>
+                        {% for value, name in game_formats %}
+                        <option value="{{ value }}" {% if selected_game_format and selected_game_format == value %}selected{% endif %}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="region" class="form-label">Регион</label>
+                    <select name="region" id="region" class="form-control">
+                        <option value="">Все</option>
+                        {% for value, name in regions %}
+                        <option value="{{ value }}" {% if selected_region and selected_region == value %}selected{% endif %}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <!-- Фильтр по статусу -->
+                <div class="mb-3">
+                    <label for="status" class="form-label">Статус турнира</label>
+                    <select name="status" id="status" class="form-control">
+                        <option value="">Все</option>
+                        <option value="upcoming" {% if selected_status and selected_status == 'upcoming' %}selected{% endif %}>Запланированные</option>
+                        <option value="in_progress" {% if selected_status and selected_status == 'in_progress' %}selected{% endif %}>В процессе</option>
+                        <option value="completed" {% if selected_status and selected_status == 'completed' %}selected{% endif %}>Завершённые</option>
+                    </select>
+                </div>
+                <!-- Кнопки формы -->
+                <div class="apply-button-wrapper">
+                    <button type="submit" class="btn btn-primary">Применить</button>
+                </div>
+                <div class="apply-button-wrapper">
+                    <a href="{% url 'tournaments' %}" class="btn btn-outline-secondary">Сбросить</a>
+                </div>
+            </form>
+        </div>
+        <!-- Основной контент -->
+        <div class="col-md-9 main-content px-4 py-4">
+            <div class="header text-center mb-4">
+                <h1 class="gradient-text">Турниры</h1>
+            </div>
+            <!-- Кнопки для пользователя -->
+            {% if user.is_authenticated %}
+            <div class="d-flex justify-content-center mb-4 gap-2">
+                <a href="{% url 'create_tournament' %}" class="btn btn-primary"><i class="fas fa-plus me-1"></i>Создать турнир</a>
+                <a href="{% url 'my_tournaments' %}" class="btn btn-outline-secondary"><i class="fas fa-trophy me-1"></i>Мои турниры</a>
+            </div>
+            {% endif %}
+            <!-- Список турниров -->
+            <div class=" tournaments-container">
+                {% if tournaments %}
+                <div class="row">
+                    {% for t in tournaments %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <!-- Кликабельная карточка -->
+                        <a href="/tournaments/{{ t.id }}/" style="text-decoration: none;">
+                            <div class="tournament-card h-100 w-100 d-block">
+                                <img src="{% static 'app/images/default-tournament.jpg' %}" class="tournament-img" alt="Tournament Image">
+                                <div class="tournament-body">
+                                    <!-- Игра и название -->
+                                    <div class="tournament-title mt-2 d-flex align-items-center">
+                                        <img src="{% static 'app/images/'|add:t.discipline|lower|add:'.png' %}" alt="{{ t.discipline }}" class="tournament-game-icon me-2">
+                                        {{ t.name }}
+                                    </div>
+                                    <!-- Дата начала -->
+                                    <div class="tournament-meta tournament-date">Начало: {{ t.start_date|date:"d M, H:i" }}</div>
+                                    <!-- Дисциплина и формат -->
+                                    <div class="tournament-meta">{{ t.get_discipline_display }} • {{ t.game_format|upper }}</div>
+                                    <!-- Регион -->
+                                    <div class="tournament-tag">{{ t.get_location_display }}</div>
+                                    <!-- Статус турнира -->
+                                    <div class="d-flex align-items-center my-2">
+                                        <span class="status-badge
+                                            {% if t.get_status == 'planned' %}status-upcoming
+                                            {% elif t.get_status == 'in_progress' %}status-in-progress
+                                            {% elif t.get_status == 'completed' %}status-completed{% endif %}">
+                                            {{ t.get_status_display }}
+                                        </span>
+                                    </div>
+                                    <!-- Участники -->
+                                    <div class="tournament-meta">Участников: {{ t.registered_teams_count }}/{{ t.max_teams }}</div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center mt-5">
+                    <p class="text-muted">Нет активных турниров</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

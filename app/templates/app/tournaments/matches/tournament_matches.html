@@ -1,0 +1,210 @@
+{% extends "app/layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-gamepad fa-2x text-primary me-3"></i>
+            <h1 class="mb-0">Матчи турнира "{{ tournament.name }}"</h1>
+        </div>
+        <a href="{% url 'tournament_detail' tournament.id %}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-1"></i>Назад к турниру
+        </a>
+    </div>
+
+    {% if upcoming_matches %}
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Предстоящие матчи</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for match in upcoming_matches %}
+                <div class="col-md-6 mb-3">
+                    <div class="match-card">
+                        <div class="match-time">
+                            <i class="far fa-calendar-alt me-1"></i>
+                            {{ match.scheduled_time|date:"d.m.Y H:i" }}
+                        </div>
+                        <div class="match-teams">
+                            <div class="team">
+                                {{ match.team1.name }}
+                            </div>
+                            <div class="vs">vs</div>
+                            <div class="team">
+                                {{ match.team2.name }}
+                            </div>
+                        </div>
+                        <div class="match-actions">
+                            <a href="{% url 'match_detail' tournament_id=tournament.id match_id=match.id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-info-circle me-1"></i>Подробнее
+                            </a>
+                            {% if tournament.created_by == user %}
+                            <a href="{% url 'advanced_match_result' tournament.id match.id %}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-edit me-1"></i>Редактировать результат
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if matches_by_stage %}
+    {% for stage, matches in matches_by_stage.items %}
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-trophy me-2"></i>{{ stage }}</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for match in matches %}
+                <div class="col-md-6 mb-3">
+                    <div class="match-card {% if match.is_completed %}completed{% endif %}">
+                        <div class="match-time">
+                            <i class="far fa-calendar-alt me-1"></i>
+                            {{ match.scheduled_time|date:"d.m.Y H:i" }}
+                        </div>
+                        <div class="match-teams">
+                            <div class="team {% if match.winner == match.team1 %}winner{% endif %}">
+                                {{ match.team1.name }}
+                                {% if match.team1_score is not None %}
+                                <span class="score">{{ match.team1_score }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="vs">vs</div>
+                            <div class="team {% if match.winner == match.team2 %}winner{% endif %}">
+                                {{ match.team2.name }}
+                                {% if match.team2_score is not None %}
+                                <span class="score">{{ match.team2_score }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if match.is_completed %}
+                        <div class="match-winner">
+                            <i class="fas fa-trophy me-1"></i>
+                            Победитель: {{ match.winner.name }}
+                        </div>
+                        {% endif %}
+                        <div class="match-actions">
+                            <a href="{% url 'match_detail' tournament_id=tournament.id match_id=match.id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-info-circle me-1"></i>Подробнее
+                            </a>
+                            {% if tournament.created_by == user %}
+                            <a href="{% url 'advanced_match_result' tournament.id match.id %}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-edit me-1"></i>Редактировать результат
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="alert alert-info d-flex align-items-center" role="alert">
+        <i class="fas fa-info-circle fa-2x me-3"></i>
+        <div>
+            <h5 class="alert-heading">Матчи не найдены</h5>
+            {% if tournament.created_by == user %}
+            <p class="mb-0">Для создания матчей необходимо сформировать турнирную сетку.</p>
+            {% else %}
+            <p class="mb-0">Матчи пока не созданы.</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .match-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        padding: 16px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        border: 2px solid transparent;
+    }
+
+    .match-card.completed {
+        border-color: #28a745;
+    }
+
+    .match-time {
+        color: #666;
+        font-size: 0.95rem;
+        margin-bottom: 8px;
+    }
+
+    .match-teams {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        flex-grow: 1;
+    }
+
+    .team {
+        flex: 1;
+        text-align: center;
+        padding: 8px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .team.winner {
+        background: #d4edda;
+        color: #155724;
+        font-weight: bold;
+    }
+
+    .vs {
+        margin: 0 12px;
+        color: #888;
+        font-weight: bold;
+    }
+
+    .score {
+        background: #e9ecef;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: bold;
+    }
+
+    .match-winner {
+        color: #28a745;
+        font-weight: 500;
+        margin-bottom: 12px;
+        text-align: center;
+    }
+
+    .match-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+    }
+
+    @media (max-width: 768px) {
+        .match-teams {
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .vs {
+            margin: 4px 0;
+        }
+    }
+</style>
+{% endblock %}

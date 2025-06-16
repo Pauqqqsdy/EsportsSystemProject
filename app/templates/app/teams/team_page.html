@@ -1,0 +1,299 @@
+{% extends "app/layout.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Вкладки */
+    .nav-tabs {
+        border-bottom: 1px solid #4cc9f0;
+    }
+
+    .nav-link {
+        color: #e6e6e6;
+        font-weight: bold;
+    }
+
+        .nav-link.active {
+            background-color: transparent !important;
+            color: white !important;
+            border-bottom: 2px solid #4cc9f0;
+        }
+
+    /* Блоки информации */
+    .info-block {
+        background-color: #2d2d42;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+    }
+
+        .info-block h5 {
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .info-block p {
+            color: #a8a8a8;
+        }
+
+    /* Кнопки */
+    .btn-primary {
+        background-color: #4cc9f0;
+        color: white;
+        font-weight: bold;
+        padding: 10px 20px;
+        border-radius: 20px;
+    }
+
+        .btn-primary:hover {
+            background-color: #3aa7cc;
+        }
+
+    .btn-danger {
+        background-color: #ff4444;
+        color: white;
+        font-weight: bold;
+        padding: 10px 20px;
+        border-radius: 20px;
+    }
+
+        .btn-danger:hover {
+            background-color: #ff6666;
+        }
+
+    .btn-outline-secondary {
+        color: black;
+        border-color: #e6e6e6;
+        padding: 10px 20px;
+        border-radius: 35px;
+    }
+
+        .btn-outline-secondary:hover {
+            background-color: #4cc9f0;
+            color: black;
+        }
+
+    /* Правая колонка */
+    .right-column {
+        background-color: #1a1a2e;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+
+        .right-column h5 {
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .right-column p {
+            color: #a8a8a8;
+        }
+
+    /* Форматы блоков */
+    .info-box {
+        background-color: #2d2d42;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+
+        .info-box h5 {
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .info-box p {
+            color: #a8a8a8;
+        }
+
+    /* Список участников */
+    .member-card {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 0;
+        border-bottom: 1px solid #4cc9f0;
+    }
+
+    .member-avatar {
+        width: 40px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+
+    .member-name {
+        font-weight: bold;
+        color: #e6e6e6;
+    }
+
+    .member-role {
+        color: #a8a8a8;
+        font-size: 0.85rem;
+        margin-left: auto;
+    }
+
+    .ml-auto {
+        margin-left: auto;
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="row">
+        <!-- Левая колонка -->
+        <div class="col-md-8">
+            <!-- Заголовок команды с аватаром -->
+            <div class="align-items-center mb-3">
+                <img src="{% if team.avatar %}{{ team.avatar.url }}{% else %}/media/team_avatars/default_team.jpg{% endif %}"
+                     class="img-fluid rounded-circle mb-4"
+                     style="width: 150px; height: 150px; object-fit: cover;">
+                <h1 class="mb-0 ms-3">{{ team.name }}</h1>
+            </div>
+
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#overview" data-bs-toggle="tab">
+                        <i class="fas fa-info-circle me-1"></i>Обзор
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#matches" data-bs-toggle="tab">
+                        <i class="fas fa-trophy me-1"></i>Матчи
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#statistics" data-bs-toggle="tab">
+                        <i class="fas fa-chart-bar me-1"></i>Статистика
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Тело вкладок -->
+            <div class="tab-content mt-3">
+                <!-- Вкладка Обзор -->
+                <div id="overview" class="tab-pane fade show active">
+                    <div class="info-block">
+                        <h5>Участники ({{ team.member_count }}/8)</h5>
+
+                        {% for member in team.get_all_members %}
+                        <div class="member-card d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="{{ member.userprofile.avatar.url }}" alt="{{ member.username }}" class="member-avatar">
+                                <a href="{% url 'view_profile' username=member.username %}" class="member-name">
+                                    {{ member.username }}
+                                </a>
+                                <span class="member-role">
+                                    {% if member == team.captain %}
+                                    Капитан
+                                    {% else %}
+                                    Участник
+                                    {% endif %}
+                                </span>
+                            </div>
+
+                            <!-- Кнопки только для капитана -->
+                            {% if is_captain and member != request.user %}
+                            <div class="ml-auto d-flex gap-2">
+                                <a href="{% url 'transfer_leadership' team_id=team.id new_captain_id=member.id %}"
+                                   class="btn btn-sm btn-outline-secondary">
+                                    Сделать капитаном
+                                </a>
+                                <a href="{% url 'remove_member' team_id=team.id member_id=member.id %}"
+                                   class="btn btn-sm btn-outline-danger">
+                                    Удалить
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% empty %}
+                        <p class="text-muted">Пока никто не присоединился к команде</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Вкладка Матчи -->
+                <div id="matches" class="tab-pane fade">
+                    <h5>Матчи</h5>
+                    <p>Данные о матчах будут доступны позже.</p>
+                </div>
+
+                <!-- Вкладка Статистика -->
+                <div id="statistics" class="tab-pane fade">
+                    <h5>Статистика</h5>
+                    <p>Данные о статистике будут доступны позже.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Правая колонка -->
+        <div class="col-md-4">
+            <!-- Информационные блоки -->
+            <div class="right-column">
+                <div class="info-box">
+                    <h5>Дата создания</h5>
+                    <p>{{ team.created_at|date:"d M, Y H:i" }}</p>
+                </div>
+                {% if is_captain %}
+                <div class="info-box">
+                    <h5>Ссылка приглашения</h5>
+                    <div class="input-group mb-2">
+                        <input type="text"
+                               class="form-control form-control-sm bg-dark text-white"
+                               value="{{ invite_link }}"
+                               id="inviteLink"
+                               readonly>
+                        <button class="btn btn-outline-secondary btn-sm" type="button" onclick="copyInviteLink()">
+                            Копировать
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+
+            <!-- Кнопки для капитана -->
+            {% if is_captain %}
+            <div class="action-buttons mt-4">
+                <a href="{% url 'edit_team' team_id=team.id %}" class="btn btn-primary mb-2 w-100">
+                    Редактировать команду
+                </a>
+                <a href="{% url 'delete_team' team_id=team.id %}" class="btn btn-danger w-100">
+                    Удалить команду
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- Блок Участие -->
+            <div class="card mt-4 mb-4">
+                    {% if user.is_authenticated %}
+                    {% if is_member and not is_captain %}
+                    <form action="{% url 'leave_team' %}" method="post">
+                        {% csrf_token %}
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-sign-out-alt me-1"></i>Покинуть команду
+                            </button>
+                        </div>
+                    </form>
+                    {% endif %}
+                    {% else %}
+                    <div class="alert alert-info">
+                        Для просмотра информации необходимо <a href="{% url 'login' %}">войти</a>
+                    </div>
+                    {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function copyInviteLink() {
+        const copyText = document.getElementById("inviteLink");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999);
+        document.execCommand("copy");
+        alert("Ссылка скопирована: " + copyText.value);
+    }
+</script>
+{% endblock %}

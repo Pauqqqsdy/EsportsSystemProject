@@ -1,0 +1,62 @@
+{% extends "app/layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-sitemap me-2"></i>
+                        Формирование турнирной сетки
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        {% if tournament.tournament_format == 'single_elimination' %}
+                        <div class="mb-4">
+                            {{ form.third_place_match }}
+                            <label for="{{ form.third_place_match.id_for_label }}" class="form-label">
+                                {{ form.third_place_match.label }}
+                            </label>
+                        </div>
+                        {% endif %}
+
+                        {% if tournament.tournament_format == 'round_robin' %}
+                        <div class="mb-4">
+                            <label for="{{ form.default_format.id_for_label }}" class="form-label">
+                                {{ form.default_format.label }}
+                            </label>
+                            {{ form.default_format }}
+                        </div>
+                        {% else %}
+                        <h5 class="mb-3">Форматы матчей по этапам:</h5>
+                        {% for field in form %}
+                        {% if field.name|slice:":12" == "format_round" %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label">
+                                {{ field.label }}
+                            </label>
+                            {{ field }}
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                        {% endif %}
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'tournament_detail' tournament_id=tournament.id %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i>Отмена
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check me-1"></i>Создать сетку
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

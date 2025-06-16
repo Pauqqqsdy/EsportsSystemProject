@@ -1,0 +1,293 @@
+{% extends "app/layout.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+    /* Градиентный фон контейнера */
+    .my-tournaments-container {
+        background: linear-gradient(145deg, #1a1a2e, #161b2e, #0f0f1c);
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 0 20px rgba(76, 201, 240, 0.1);
+    }
+
+    /* Тень под карточкой */
+    .card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        background-color: #1f2033;
+    }
+
+    /* Заголовок страницы */
+    h1 {
+        color: #ffffff;
+        font-weight: bold;
+    }
+
+    /* Вкладки */
+    .nav-tabs {
+        --bs-nav-tabs-link-active-bg: #1f2033;
+        --bs-nav-tabs-link-hover-bg: transparent;
+        --bs-nav-tabs-border-color: #4cc9f0;
+    }
+
+        .nav-tabs .nav-link {
+            color: #bbbbbb;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+            .nav-tabs .nav-link:hover {
+                color: #ffffff;
+            }
+
+            .nav-tabs .nav-link.active,
+            .nav-tabs .nav-link:focus {
+                color: #4cc9f0;
+                border-bottom-color: #4cc9f0;
+            }
+
+    /* Лейблы внутри карточек */
+    label {
+        color: #ffffff;
+    }
+
+    /* Текст внутри карточек */
+    .card-body {
+        color: #ffffff;
+    }
+
+    /* Подписи и мелкий текст */
+    .text-muted {
+        color: #bbbbbb !important;
+    }
+
+    /* Иконки */
+    i.fas {
+        color: #ffffff;
+    }
+
+    /* Карточки турниров */
+    .card {
+        transition: transform 0.3s ease;
+    }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+    /* Заголовки карточек */
+    .card-title {
+        color: #ffffff;
+    }
+
+    /* Badges */
+    .badge.bg-success {
+        background-color: #4cc9f0 !important;
+        font-weight: normal;
+    }
+
+    .badge.bg-primary {
+        background-color: #3aa7cc !important;
+        font-weight: normal;
+    }
+
+    /* Кнопки */
+    .btn-outline-primary,
+    .btn-outline-secondary {
+        border-color: #4cc9f0;
+        color: #4cc9f0;
+        font-weight: bold;
+        border-radius: 10px;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-outline-primary:hover,
+        .btn-outline-secondary:hover {
+            background-color: #2a2c40;
+            color: #ffffff;
+        }
+
+    /* Алерт */
+    .alert-info {
+        background-color: #2a2c40;
+        color: #ffffff;
+        border: none;
+        border-radius: 10px;
+    }
+
+        .alert-info a.alert-link {
+            color: #4cc9f0;
+            text-decoration: underline;
+        }
+
+            .alert-info a.alert-link:hover {
+                color: #3aa7cc;
+            }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .my-tournaments-container {
+            padding: 1.5rem;
+        }
+    }
+</style>
+
+<div class="container mt-5 py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Заголовок -->
+            <div class="d-flex align-items-center mb-4">
+                <i class="fas fa-trophy fa-2x text-primary me-3"></i>
+                <h1 class="mb-0">Мои турниры</h1>
+            </div>
+
+            <!-- Вкладки -->
+            <ul class="nav nav-tabs mb-4" id="myTournamentsTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="participating-tab" data-bs-toggle="tab"
+                            data-bs-target="#participating" type="button" role="tab"
+                            aria-controls="participating" aria-selected="true">
+                        <i class="fas fa-users me-2"></i>Турниры с моим участием
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="created-tab" data-bs-toggle="tab"
+                            data-bs-target="#created" type="button" role="tab"
+                            aria-controls="created" aria-selected="false">
+                        <i class="fas fa-plus-circle me-2"></i>Созданные мной турниры
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Контент вкладок -->
+            <div class="tab-content my-tournaments-container" id="myTournamentsTabContent">
+                <!-- Турниры с моим участием -->
+                <div class="tab-pane fade show active" id="participating" role="tabpanel"
+                     aria-labelledby="participating-tab">
+                    {% if participating_tournaments %}
+                    <div class="row g-4">
+                        {% for tournament in participating_tournaments %}
+                        <div class="col-md-6">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-start justify-content-between mb-3">
+                                        <h5 class="card-title mb-0">
+                                            <i class="fas fa-gamepad me-2 text-primary"></i>{{ tournament.name }}
+                                        </h5>
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Участвую
+                                        </span>
+                                    </div>
+                                    <p class="card-text text-muted mb-2">
+                                        <i class="fas fa-tag me-1"></i>{{ tournament.discipline }} • {{ tournament.get_game_format_display }}
+                                    </p>
+                                    <p class="card-text text-muted mb-3">
+                                        <i class="fas fa-calendar-alt me-1"></i>
+                                        <small>Начало: {{ tournament.start_date|date:"d.m.Y H:i" }}</small>
+                                    </p>
+                                    <div class="d-grid">
+                                        <a href="{% url 'tournament_detail' tournament_id=tournament.id %}"
+                                           class="btn btn-outline-primary">
+                                            <i class="fas fa-info-circle me-1"></i>Подробнее
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info d-flex align-items-center" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <div>
+                            Вы не участвуете ни в одном активном турнире.
+                            <a href="{% url 'tournaments' %}" class="alert-link">Найти турниры</a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Созданные мной турниры -->
+                <div class="tab-pane fade" id="created" role="tabpanel" aria-labelledby="created-tab">
+                    {% if created_tournaments %}
+                    <div class="row g-4">
+                        {% for tournament in created_tournaments %}
+                        <div class="col-md-6">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-start justify-content-between mb-3">
+                                        <h5 class="card-title mb-0">
+                                            <i class="fas fa-crown me-2 text-warning"></i>{{ tournament.name }}
+                                        </h5>
+                                        <span class="badge bg-primary">
+                                            <i class="fas fa-user-shield me-1"></i>Организатор
+                                        </span>
+                                    </div>
+                                    <p class="card-text text-muted mb-2">
+                                        <i class="fas fa-tag me-1"></i>{{ tournament.discipline }} • {{ tournament.get_game_format_display }}
+                                    </p>
+                                    <p class="card-text text-muted mb-2">
+                                        <i class="fas fa-calendar-alt me-1"></i>
+                                        <small>Начало: {{ tournament.start_date|date:"d.m.Y H:i" }}</small>
+                                    </p>
+                                    <p class="card-text text-muted mb-3">
+                                        <i class="fas fa-users me-1"></i>
+                                        <small>Участников: {{ tournament.registered_teams_count }}/{{ tournament.max_teams }}</small>
+                                    </p>
+                                    <div class="d-flex gap-2">
+                                        <a href="{% url 'tournament_detail' tournament_id=tournament.id %}"
+                                           class="btn btn-outline-primary flex-fill">
+                                            <i class="fas fa-info-circle me-1"></i>Подробнее
+                                        </a>
+                                        <a href="{% url 'edit_tournament' tournament_id=tournament.id %}"
+                                           class="btn btn-outline-secondary flex-fill">
+                                            <i class="fas fa-edit me-1"></i>Редактировать
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info d-flex align-items-center" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <div>
+                            Вы не создали ни одного турнира.
+                            <a href="{% url 'create_tournament' %}" class="alert-link">Создать турнир</a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const hash = window.location.hash;
+        if (hash) {
+            const tabTrigger = document.querySelector(`[data-bs-target="${hash}"]`);
+            if (tabTrigger) {
+                const tab = new bootstrap.Tab(tabTrigger);
+                tab.show();
+            }
+        }
+
+        const tabTriggers = document.querySelectorAll('[data-bs-toggle="tab"]');
+        tabTriggers.forEach(trigger => {
+            trigger.addEventListener('shown.bs.tab', function (event) {
+                window.location.hash = event.target.getAttribute('data-bs-target');
+            });
+        });
+    });
+</script>
+{% endblock %}
