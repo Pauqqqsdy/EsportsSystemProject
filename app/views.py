@@ -773,33 +773,44 @@ def tournament_bracket(request, tournament_id):
         context['bracket'] = bracket
         if bracket:
             # Формируем данные для jQuery Bracket
-            matches = []
             stages = list(bracket.stages.order_by('order'))
-            for stage in stages:
-                stage_matches = list(stage.matches.order_by('order'))
-                round_matches = []
-                for match in stage_matches:
-                    team1 = match.team1.name if match.team1 else None
-                    team2 = match.team2.name if match.team2 else None
-                    score1 = match.team1_score if match.is_completed else None
-                    score2 = match.team2_score if match.is_completed else None
-                    round_matches.append({
-                        'teams': [team1, team2],
-                        'scores': [score1, score2],
-                        'is_completed': match.is_completed,
-                    })
-                if round_matches:
-                    matches.append(round_matches)
-            if matches and all(m['teams'][0] and m['teams'][1] for m in matches[0]):
+            
+            if stages:
+                # Получаем команды из первого раунда
+                first_stage = stages[0]
+                first_stage_matches = list(first_stage.matches.order_by('order'))
+                
+                # Создаем список команд для первого раунда
+                teams = []
+                for match in first_stage_matches:
+                    team1 = match.team1.name if match.team1 else 'TBD'
+                    team2 = match.team2.name if match.team2 else 'TBD'
+                    teams.append([team1, team2])
+                
+                # Создаем результаты для всех раундов
+                results = []
+                for stage in stages:
+                    stage_matches = list(stage.matches.order_by('order'))
+                    round_results = []
+                    for match in stage_matches:
+                        if match.is_completed:
+                            score1 = match.team1_score
+                            score2 = match.team2_score
+                        else:
+                            score1 = None
+                            score2 = None
+                        round_results.append([score1, score2])
+                    results.append(round_results)
+                
+                # Создаем данные для jquery-bracket
                 bracket_data = {
-                    'teams': [[m['teams'][0], m['teams'][1]] for m in matches[0]],
-                    'results': [
-                        [[m['scores'][0], m['scores'][1]] if m['is_completed'] else [None, None] for m in round_matches]
-                        for round_matches in matches
-                    ]
+                    'teams': teams,
+                    'results': results
                 }
+                
                 print(json.dumps(bracket_data, ensure_ascii=False, indent=2))
                 context['bracket_data'] = json.dumps(bracket_data, ensure_ascii=False)
+            
             upcoming_matches = get_upcoming_matches(tournament)
             context['upcoming_matches'] = upcoming_matches[:5]
             # Формы для незавершённых матчей
@@ -1090,26 +1101,20 @@ def tournament_matches(request, tournament_id):
     tournament = get_object_or_404(Tournament, id=tournament_id)
     
     upcoming_matches = get_upcoming_matches(tournament)
-    matches_by_stage = []
+    matches_by_stage = {}
     
     # Группируем матчи по стадиям
     if tournament.tournament_format == 'round_robin':
         if hasattr(tournament, 'round_robin_table'):
             all_matches = tournament.round_robin_table.matches.all()
             if all_matches:
-                matches_by_stage.append({
-                    'stage': type('obj', (object,), {'name': 'Round Robin', 'stage_type': 'ROUND_ROBIN'})(),
-                    'matches': all_matches
-                })
+                matches_by_stage['Round Robin'] = all_matches
     else:
         if hasattr(tournament, 'bracket'):
             for stage in tournament.bracket.stages.all().order_by('order'):
                 stage_matches = stage.matches.all()
                 if stage_matches:
-                    matches_by_stage.append({
-                        'stage': stage,
-                        'matches': stage_matches
-                    })
+                    matches_by_stage[stage.name] = stage_matches
     
     context = {
         'tournament': tournament,

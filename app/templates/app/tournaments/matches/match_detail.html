@@ -1,57 +1,454 @@
 {% extends "app/layout.html" %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div class="d-flex align-items-center">
-            <i class="fas fa-gamepad fa-2x text-primary me-3"></i>
-            <h1 class="mb-0">Матч</h1>
-        </div>
-        <div class="d-flex gap-2">
-            {% if match_type == 'round_robin' %}
-            <a href="{% url 'round_robin_table' tournament.id %}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left me-1"></i>Назад к таблице
-            </a>
-            {% else %}
-            <a href="{% url 'tournament_bracket' tournament.id %}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left me-1"></i>Назад к сетке
-            </a>
-            {% endif %}
-            {% if is_creator and match.scheduled_time and not match.is_completed %}
-            <a href="{% url 'edit_match_schedule' tournament.id match.id %}" class="btn btn-outline-primary">
-                <i class="fas fa-calendar-edit me-1"></i>Изменить время
-            </a>
-            {% endif %}
+<style>
+    /* Стили для страницы матча */
+    .matchroom-container {
+        background-color: #1a1a2e;
+        color: #e6e6e6;
+    }
+
+    /* Заголовок страницы */
+    .page-header {
+        background-color: #2d2d42;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        border-left: 4px solid #4cc9f0;
+    }
+
+    .page-header h1 {
+        color: #ffffff;
+        font-weight: bold;
+        margin-bottom: 0;
+    }
+
+    /* Основная карточка матча */
+    .match-main-card {
+        background-color: #2d2d42;
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .match-main-card .card-body {
+        padding: 40px 30px;
+        color: #e6e6e6;
+    }
+
+    /* Команды */
+    .team-section {
+        text-align: center;
+    }
+
+    .team-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 15px;
+        border: 3px solid #4cc9f0;
+        transition: transform 0.3s ease;
+    }
+
+    .team-avatar:hover {
+        transform: scale(1.05);
+    }
+
+    .team-avatar-placeholder {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background-color: #4cc9f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 15px;
+        border: 3px solid #4cc9f0;
+        color: #ffffff;
+        font-size: 2rem;
+    }
+
+    .team-name {
+        color: #ffffff;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .team-name a {
+        color: #4cc9f0;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .team-name a:hover {
+        color: #3aa7cc;
+        text-decoration: underline;
+    }
+
+    /* Счет */
+    .score-section {
+        text-align: center;
+        padding: 20px 0;
+    }
+
+    .score-display {
+        font-size: 4rem;
+        font-weight: bold;
+        color: #4cc9f0;
+        margin-bottom: 15px;
+        text-shadow: 0 0 10px rgba(76, 201, 240, 0.3);
+    }
+
+    .vs-display {
+        font-size: 3rem;
+        color: #a8a8a8;
+        margin-bottom: 15px;
+    }
+
+    /* Статус матча */
+    .match-status {
+        margin-bottom: 20px;
+    }
+
+    .badge {
+        font-size: 1rem;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: bold;
+    }
+
+    .bg-success {
+        background-color: #28a745 !important;
+        color: #ffffff !important;
+    }
+
+    .bg-warning {
+        background-color: #ffc107 !important;
+        color: #000000 !important;
+    }
+
+    .bg-secondary {
+        background-color: #6c757d !important;
+        color: #ffffff !important;
+    }
+
+    /* Информация о матче */
+    .match-info {
+        background-color: #1a1a2e;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+
+    .match-info p {
+        color: #a8a8a8;
+        margin-bottom: 8px;
+    }
+
+    .match-info strong {
+        color: #e6e6e6;
+    }
+
+    /* Кнопки */
+    .btn {
+        border-radius: 20px;
+        font-weight: bold;
+        padding: 10px 20px;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .btn-primary {
+        background-color: #4cc9f0;
+        border-color: #4cc9f0;
+        color: #ffffff;
+    }
+
+    .btn-primary:hover {
+        background-color: #3aa7cc;
+        border-color: #3aa7cc;
+        color: #ffffff;
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        color: #ffffff;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+        border-color: #5a6268;
+        color: #ffffff;
+    }
+
+    .btn-outline-primary {
+        border-color: #4cc9f0;
+        color: #4cc9f0;
+        background-color: transparent;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #4cc9f0;
+        border-color: #4cc9f0;
+        color: #ffffff;
+    }
+
+    .btn-lg {
+        padding: 15px 30px;
+        font-size: 1.1rem;
+    }
+
+    /* Карточки команд */
+    .team-card {
+        background-color: #2d2d42;
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        height: 100%;
+        transition: transform 0.3s ease;
+    }
+
+    .team-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .team-card .card-header {
+        background-color: #16213e;
+        border-bottom: 2px solid #4cc9f0;
+        padding: 15px 20px;
+    }
+
+    .team-card .card-header h5 {
+        color: #ffffff;
+        font-weight: bold;
+        margin-bottom: 0;
+    }
+
+    .team-card .card-body {
+        padding: 20px;
+        color: #e6e6e6;
+    }
+
+    .team-card .card-header.team1-header {
+        border-bottom-color: #4cc9f0;
+    }
+
+    .team-card .card-header.team2-header {
+        border-bottom-color: #ff6b6b;
+    }
+
+    /* Игроки */
+    .player-section h6 {
+        color: #4cc9f0;
+        font-weight: bold;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #3a3a5a;
+        padding-bottom: 8px;
+    }
+
+    .player-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        padding: 8px;
+        border-radius: 8px;
+        transition: background-color 0.3s ease;
+    }
+
+    .player-item:hover {
+        background-color: #1a1a2e;
+    }
+
+    .player-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 12px;
+        border: 2px solid #4cc9f0;
+    }
+
+    .player-avatar-placeholder {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #6c757d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        border: 2px solid #6c757d;
+        color: #ffffff;
+        font-size: 0.9rem;
+    }
+
+    .player-info {
+        flex: 1;
+    }
+
+    .player-name {
+        color: #ffffff;
+        font-weight: 500;
+        margin-bottom: 2px;
+    }
+
+    .player-name a {
+        color: #4cc9f0;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .player-name a:hover {
+        color: #3aa7cc;
+        text-decoration: underline;
+    }
+
+    .player-role {
+        color: #a8a8a8;
+        font-size: 0.85rem;
+    }
+
+    /* Информация о турнире */
+    .tournament-info-card {
+        background-color: #2d2d42;
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .tournament-info-card .card-header {
+        background-color: #16213e;
+        border-bottom: 2px solid #4cc9f0;
+        padding: 15px 20px;
+    }
+
+    .tournament-info-card .card-header h6 {
+        color: #ffffff;
+        font-weight: bold;
+        margin-bottom: 0;
+    }
+
+    .tournament-info-card .card-body {
+        padding: 20px;
+        color: #e6e6e6;
+    }
+
+    .tournament-info-item {
+        margin-bottom: 15px;
+    }
+
+    .tournament-info-item strong {
+        color: #4cc9f0;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .tournament-info-item p {
+        color: #a8a8a8;
+        margin-bottom: 0;
+    }
+
+    .tournament-info-item a {
+        color: #4cc9f0;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .tournament-info-item a:hover {
+        color: #3aa7cc;
+        text-decoration: underline;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .match-main-card .card-body {
+            padding: 20px 15px;
+        }
+
+        .team-avatar,
+        .team-avatar-placeholder {
+            width: 80px;
+            height: 80px;
+        }
+
+        .score-display {
+            font-size: 3rem;
+        }
+
+        .vs-display {
+            font-size: 2.5rem;
+        }
+
+        .team-name {
+            font-size: 1.3rem;
+        }
+
+        .btn-lg {
+            padding: 12px 24px;
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<div class="container mt-4 matchroom-container">
+    <!-- Заголовок страницы -->
+    <div class="page-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-gamepad fa-2x text-primary me-3"></i>
+                <h1 class="mb-0">Матч</h1>
+            </div>
+            <div class="d-flex gap-2">
+                {% if match_type == 'round_robin' %}
+                <a href="{% url 'round_robin_table' tournament.id %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Назад к таблице
+                </a>
+                {% else %}
+                <a href="{% url 'tournament_bracket' tournament.id %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Назад к сетке
+                </a>
+                {% endif %}
+                {% if is_creator and match.scheduled_time and not match.is_completed %}
+                <a href="{% url 'edit_match_schedule' tournament.id match.id %}" class="btn btn-outline-primary">
+                    <i class="fas fa-calendar-edit me-1"></i>Изменить время
+                </a>
+                {% endif %}
+            </div>
         </div>
     </div>
 
     <!-- Основная информация о матче -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-body text-center py-5">
+            <div class="match-main-card">
+                <div class="card-body text-center">
                     <div class="row align-items-center">
                         <!-- Команда 1 -->
                         <div class="col-md-4">
-                            <div class="d-flex flex-column align-items-center">
+                            <div class="team-section">
                                 {% if match.team1.avatar %}
                                 <img src="{{ match.team1.avatar.url }}"
                                      alt="{{ match.team1.name }}"
-                                     class="rounded-circle mb-3"
-                                     width="80" height="80">
+                                     class="team-avatar">
                                 {% else %}
-                                <div class="bg-primary rounded-circle mb-3 d-flex align-items-center justify-content-center"
-                                     style="width: 80px; height: 80px;">
-                                    <i class="fas fa-users text-white fa-2x"></i>
+                                <div class="team-avatar-placeholder">
+                                    <i class="fas fa-users"></i>
                                 </div>
                                 {% endif %}
-                                <h3 class="fw-bold mb-2">
-                                    <a href="{% url 'team_page' match.team1.id %}" class="text-decoration-none">
+                                <h3 class="team-name">
+                                    <a href="{% url 'team_page' match.team1.id %}">
                                         {{ match.team1.name }}
                                     </a>
                                 </h3>
                                 {% if match.is_completed and match.winner == match.team1 %}
-                                <span class="badge bg-success fs-6">
+                                <span class="badge bg-success">
                                     <i class="fas fa-trophy me-1"></i>Победитель
                                 </span>
                                 {% endif %}
@@ -60,23 +457,27 @@
 
                         <!-- Счет и информация -->
                         <div class="col-md-4">
-                            <div class="text-center">
+                            <div class="score-section">
                                 {% if match.is_completed %}
-                                <div class="display-3 fw-bold text-primary mb-3">
+                                <div class="score-display">
                                     {{ match.get_score_display }}
                                 </div>
-                                <span class="badge bg-success fs-6 mb-3">Завершен</span>
+                                <div class="match-status">
+                                    <span class="badge bg-success">Завершен</span>
+                                </div>
                                 {% else %}
-                                <div class="display-4 text-muted mb-3">VS</div>
-                                {% if match.scheduled_time %}
-                                <span class="badge bg-warning text-dark fs-6 mb-3">Запланирован</span>
-                                {% else %}
-                                <span class="badge bg-secondary fs-6 mb-3">Ожидание</span>
-                                {% endif %}
+                                <div class="vs-display">VS</div>
+                                <div class="match-status">
+                                    {% if match.scheduled_time %}
+                                    <span class="badge bg-warning">Запланирован</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Ожидание</span>
+                                    {% endif %}
+                                </div>
                                 {% endif %}
 
-                                <div class="mt-3">
-                                    <p class="mb-1">
+                                <div class="match-info">
+                                    <p>
                                         <strong>Формат:</strong>
                                         {% if match_type == 'round_robin' %}
                                         {{ match.get_format_display }}
@@ -85,7 +486,7 @@
                                         {% endif %}
                                     </p>
                                     {% if match.scheduled_time %}
-                                    <p class="mb-1">
+                                    <p>
                                         <strong>Время:</strong>
                                         {{ match.scheduled_time|date:"d.m.Y H:i" }}
                                     </p>
@@ -100,25 +501,23 @@
 
                         <!-- Команда 2 -->
                         <div class="col-md-4">
-                            <div class="d-flex flex-column align-items-center">
+                            <div class="team-section">
                                 {% if match.team2.avatar %}
                                 <img src="{{ match.team2.avatar.url }}"
                                      alt="{{ match.team2.name }}"
-                                     class="rounded-circle mb-3"
-                                     width="80" height="80">
+                                     class="team-avatar">
                                 {% else %}
-                                <div class="bg-secondary rounded-circle mb-3 d-flex align-items-center justify-content-center"
-                                     style="width: 80px; height: 80px;">
-                                    <i class="fas fa-users text-white fa-2x"></i>
+                                <div class="team-avatar-placeholder">
+                                    <i class="fas fa-users"></i>
                                 </div>
                                 {% endif %}
-                                <h3 class="fw-bold mb-2">
-                                    <a href="{% url 'team_page' match.team2.id %}" class="text-decoration-none">
+                                <h3 class="team-name">
+                                    <a href="{% url 'team_page' match.team2.id %}">
                                         {{ match.team2.name }}
                                     </a>
                                 </h3>
                                 {% if match.is_completed and match.winner == match.team2 %}
-                                <span class="badge bg-success fs-6">
+                                <span class="badge bg-success">
                                     <i class="fas fa-trophy me-1"></i>Победитель
                                 </span>
                                 {% endif %}
@@ -151,73 +550,68 @@
     <div class="row">
         <!-- Команда 1 -->
         <div class="col-md-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header bg-primary text-white">
+            <div class="team-card">
+                <div class="card-header team1-header">
                     <h5 class="mb-0">
                         <i class="fas fa-users me-2"></i>
                         {{ match.team1.name }}
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-12 mb-3">
-                            <h6 class="text-primary">
-                                <i class="fas fa-crown me-2"></i>Капитан
-                            </h6>
-                            <div class="d-flex align-items-center">
-                                {% if match.team1.captain.userprofile.avatar %}
-                                <img src="{{ match.team1.captain.userprofile.avatar.url }}"
-                                     alt="{{ match.team1.captain.username }}"
-                                     class="rounded-circle me-3"
-                                     width="40" height="40">
-                                {% else %}
-                                <div class="bg-secondary rounded-circle me-3 d-flex align-items-center justify-content-center"
-                                     style="width: 40px; height: 40px;">
-                                    <i class="fas fa-user text-white"></i>
+                    <div class="player-section">
+                        <h6>
+                            <i class="fas fa-crown me-2"></i>Капитан
+                        </h6>
+                        <div class="player-item">
+                            {% if match.team1.captain.userprofile.avatar %}
+                            <img src="{{ match.team1.captain.userprofile.avatar.url }}"
+                                 alt="{{ match.team1.captain.username }}"
+                                 class="player-avatar">
+                            {% else %}
+                            <div class="player-avatar-placeholder">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            {% endif %}
+                            <div class="player-info">
+                                <div class="player-name">
+                                    <a href="{% url 'view_profile' match.team1.captain.username %}">
+                                        {{ match.team1.captain.username }}
+                                    </a>
                                 </div>
-                                {% endif %}
-                                <div>
-                                    <div class="fw-bold">
-                                        <a href="{% url 'view_profile' match.team1.captain.username %}"
-                                           class="text-decoration-none">
-                                            {{ match.team1.captain.username }}
-                                        </a>
-                                    </div>
-                                    <small class="text-muted">Капитан команды</small>
-                                </div>
+                                <div class="player-role">Капитан команды</div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="col-12">
-                            <h6 class="text-primary">
-                                <i class="fas fa-users me-2"></i>Игроки
-                            </h6>
-                            {% for member in match.team1.members.all %}
-                            {% if member != match.team1.captain %}
-                            <div class="d-flex align-items-center mb-2">
-                                {% if member.userprofile.avatar %}
-                                <img src="{{ member.userprofile.avatar.url }}"
-                                     alt="{{ member.username }}"
-                                     class="rounded-circle me-3"
-                                     width="32" height="32">
-                                {% else %}
-                                <div class="bg-secondary rounded-circle me-3 d-flex align-items-center justify-content-center"
-                                     style="width: 32px; height: 32px;">
-                                    <i class="fas fa-user text-white small"></i>
-                                </div>
-                                {% endif %}
-                                <div class="small">
-                                    <a href="{% url 'view_profile' member.username %}"
-                                       class="text-decoration-none">
+                    <div class="player-section">
+                        <h6>
+                            <i class="fas fa-users me-2"></i>Игроки
+                        </h6>
+                        {% for member in match.team1.members.all %}
+                        {% if member != match.team1.captain %}
+                        <div class="player-item">
+                            {% if member.userprofile.avatar %}
+                            <img src="{{ member.userprofile.avatar.url }}"
+                                 alt="{{ member.username }}"
+                                 class="player-avatar">
+                            {% else %}
+                            <div class="player-avatar-placeholder">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            {% endif %}
+                            <div class="player-info">
+                                <div class="player-name">
+                                    <a href="{% url 'view_profile' member.username %}">
                                         {{ member.username }}
                                     </a>
                                 </div>
+                                <div class="player-role">Игрок</div>
                             </div>
-                            {% endif %}
-                            {% empty %}
-                            <p class="text-muted small">Нет дополнительных игроков</p>
-                            {% endfor %}
                         </div>
+                        {% endif %}
+                        {% empty %}
+                        <p class="text-muted small">Нет дополнительных игроков</p>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
@@ -225,73 +619,68 @@
 
         <!-- Команда 2 -->
         <div class="col-md-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header bg-secondary text-white">
+            <div class="team-card">
+                <div class="card-header team2-header">
                     <h5 class="mb-0">
                         <i class="fas fa-users me-2"></i>
                         {{ match.team2.name }}
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-12 mb-3">
-                            <h6 class="text-secondary">
-                                <i class="fas fa-crown me-2"></i>Капитан
-                            </h6>
-                            <div class="d-flex align-items-center">
-                                {% if match.team2.captain.userprofile.avatar %}
-                                <img src="{{ match.team2.captain.userprofile.avatar.url }}"
-                                     alt="{{ match.team2.captain.username }}"
-                                     class="rounded-circle me-3"
-                                     width="40" height="40">
-                                {% else %}
-                                <div class="bg-secondary rounded-circle me-3 d-flex align-items-center justify-content-center"
-                                     style="width: 40px; height: 40px;">
-                                    <i class="fas fa-user text-white"></i>
+                    <div class="player-section">
+                        <h6>
+                            <i class="fas fa-crown me-2"></i>Капитан
+                        </h6>
+                        <div class="player-item">
+                            {% if match.team2.captain.userprofile.avatar %}
+                            <img src="{{ match.team2.captain.userprofile.avatar.url }}"
+                                 alt="{{ match.team2.captain.username }}"
+                                 class="player-avatar">
+                            {% else %}
+                            <div class="player-avatar-placeholder">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            {% endif %}
+                            <div class="player-info">
+                                <div class="player-name">
+                                    <a href="{% url 'view_profile' match.team2.captain.username %}">
+                                        {{ match.team2.captain.username }}
+                                    </a>
                                 </div>
-                                {% endif %}
-                                <div>
-                                    <div class="fw-bold">
-                                        <a href="{% url 'view_profile' match.team2.captain.username %}"
-                                           class="text-decoration-none">
-                                            {{ match.team2.captain.username }}
-                                        </a>
-                                    </div>
-                                    <small class="text-muted">Капитан команды</small>
-                                </div>
+                                <div class="player-role">Капитан команды</div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="col-12">
-                            <h6 class="text-secondary">
-                                <i class="fas fa-users me-2"></i>Игроки
-                            </h6>
-                            {% for member in match.team2.members.all %}
-                            {% if member != match.team2.captain %}
-                            <div class="d-flex align-items-center mb-2">
-                                {% if member.userprofile.avatar %}
-                                <img src="{{ member.userprofile.avatar.url }}"
-                                     alt="{{ member.username }}"
-                                     class="rounded-circle me-3"
-                                     width="32" height="32">
-                                {% else %}
-                                <div class="bg-secondary rounded-circle me-3 d-flex align-items-center justify-content-center"
-                                     style="width: 32px; height: 32px;">
-                                    <i class="fas fa-user text-white small"></i>
-                                </div>
-                                {% endif %}
-                                <div class="small">
-                                    <a href="{% url 'view_profile' member.username %}"
-                                       class="text-decoration-none">
+                    <div class="player-section">
+                        <h6>
+                            <i class="fas fa-users me-2"></i>Игроки
+                        </h6>
+                        {% for member in match.team2.members.all %}
+                        {% if member != match.team2.captain %}
+                        <div class="player-item">
+                            {% if member.userprofile.avatar %}
+                            <img src="{{ member.userprofile.avatar.url }}"
+                                 alt="{{ member.username }}"
+                                 class="player-avatar">
+                            {% else %}
+                            <div class="player-avatar-placeholder">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            {% endif %}
+                            <div class="player-info">
+                                <div class="player-name">
+                                    <a href="{% url 'view_profile' member.username %}">
                                         {{ member.username }}
                                     </a>
                                 </div>
+                                <div class="player-role">Игрок</div>
                             </div>
-                            {% endif %}
-                            {% empty %}
-                            <p class="text-muted small">Нет дополнительных игроков</p>
-                            {% endfor %}
                         </div>
+                        {% endif %}
+                        {% empty %}
+                        <p class="text-muted small">Нет дополнительных игроков</p>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
@@ -301,7 +690,7 @@
     <!-- Информация о турнире -->
     <div class="row">
         <div class="col-12">
-            <div class="card bg-light">
+            <div class="tournament-info-card">
                 <div class="card-header">
                     <h6 class="mb-0">
                         <i class="fas fa-trophy me-2"></i>
@@ -311,30 +700,38 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-3">
-                            <p class="mb-1"><strong>Турнир:</strong></p>
-                            <p class="text-muted">
-                                <a href="{% url 'tournament_detail' tournament.id %}" class="text-decoration-none">
-                                    {{ tournament.name }}
-                                </a>
-                            </p>
+                            <div class="tournament-info-item">
+                                <strong>Турнир:</strong>
+                                <p>
+                                    <a href="{% url 'tournament_detail' tournament.id %}">
+                                        {{ tournament.name }}
+                                    </a>
+                                </p>
+                            </div>
                         </div>
                         <div class="col-md-3">
-                            <p class="mb-1"><strong>Дисциплина:</strong></p>
-                            <p class="text-muted">{{ tournament.discipline }}</p>
+                            <div class="tournament-info-item">
+                                <strong>Дисциплина:</strong>
+                                <p>{{ tournament.discipline }}</p>
+                            </div>
                         </div>
                         <div class="col-md-3">
-                            <p class="mb-1"><strong>Формат турнира:</strong></p>
-                            <p class="text-muted">{{ tournament.get_tournament_format_display }}</p>
+                            <div class="tournament-info-item">
+                                <strong>Формат турнира:</strong>
+                                <p>{{ tournament.get_tournament_format_display }}</p>
+                            </div>
                         </div>
                         <div class="col-md-3">
-                            <p class="mb-1"><strong>Статус турнира:</strong></p>
-                            <span class="badge
-                                {% if tournament.get_status == 'planned' %}bg-secondary
-                                {% elif tournament.get_status == 'in_progress' %}bg-warning text-dark
-                                {% elif tournament.get_status == 'completed' %}bg-success
-                                {% endif %}">
-                                {{ tournament.get_status_display }}
-                            </span>
+                            <div class="tournament-info-item">
+                                <strong>Статус турнира:</strong>
+                                <span class="badge
+                                    {% if tournament.get_status == 'planned' %}bg-secondary
+                                    {% elif tournament.get_status == 'in_progress' %}bg-warning text-dark
+                                    {% elif tournament.get_status == 'completed' %}bg-success
+                                    {% endif %}">
+                                    {{ tournament.get_status_display }}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>

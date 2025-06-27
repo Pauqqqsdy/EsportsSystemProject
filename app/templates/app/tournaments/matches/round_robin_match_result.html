@@ -1,10 +1,143 @@
 {% extends "app/layout.html" %}
 
 {% block content %}
-<div class="container mt-4">
+<style>
+    .result-container {
+        background-color: #1a1a2e;
+        color: #e6e6e6;
+    }
+
+    .result-card {
+        background-color: #2d2d42;
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .result-card .card-header {
+        background-color: #16213e;
+        border-bottom: 2px solid #4cc9f0;
+        border-radius: 10px 10px 0 0 !important;
+        padding: 15px 20px;
+    }
+
+    .result-card .card-header h5 {
+        color: #ffffff;
+        font-weight: bold;
+        margin-bottom: 0;
+    }
+
+    .result-card .card-body {
+        padding: 25px;
+        color: #e6e6e6;
+    }
+
+    /* Информационный блок */
+    .info-alert {
+        background-color: rgba(76, 201, 240, 0.1);
+        border: 1px solid #4cc9f0;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 25px;
+    }
+
+    .info-alert i {
+        color: #4cc9f0;
+        font-size: 1.2rem;
+    }
+
+    .info-alert h6 {
+        color: #ffffff;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .info-alert strong {
+        color: #4cc9f0;
+    }
+
+    /* Форма */
+    .form-label {
+        color: #ffffff;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .form-label i {
+        color: #4cc9f0;
+        margin-right: 8px;
+    }
+
+    .form-select {
+        background-color: #1a1a2e;
+        border: 1px solid #4cc9f0;
+        color: #e6e6e6;
+        border-radius: 8px;
+        padding: 10px 15px;
+        font-size: 1rem;
+    }
+
+    .form-select:focus {
+        background-color: #1a1a2e;
+        border-color: #3aa7cc;
+        color: #e6e6e6;
+        box-shadow: 0 0 0 0.2rem rgba(76, 201, 240, 0.25);
+    }
+
+    .form-select option {
+        background-color: #1a1a2e;
+        color: #e6e6e6;
+    }
+
+    /* Кнопки */
+    .btn {
+        border-radius: 20px;
+        font-weight: bold;
+        padding: 10px 20px;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .btn-primary {
+        background-color: #4cc9f0;
+        color: #ffffff;
+    }
+
+    .btn-primary:hover {
+        background-color: #3aa7cc;
+        color: #ffffff;
+        transform: translateY(-1px);
+    }
+
+    .btn-outline-secondary {
+        background-color: transparent;
+        border: 2px solid #6c757d;
+        color: #6c757d;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        color: #ffffff;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .result-card .card-body {
+            padding: 20px;
+        }
+        
+        .btn {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+    }
+</style>
+
+<div class="container mt-4 result-container">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card shadow">
+            <div class="result-card">
                 <div class="card-header">
                     <h5 class="mb-0">
                         <i class="fas fa-edit me-2 text-primary"></i>
@@ -12,7 +145,7 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
+                    <div class="info-alert d-flex align-items-center" role="alert">
                         <i class="fas fa-info-circle fa-lg me-3"></i>
                         <div>
                             <h6 class="alert-heading mb-1">Матч:</h6>

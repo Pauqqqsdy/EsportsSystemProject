@@ -92,9 +92,8 @@ def create_single_elimination_bracket(tournament, teams, distribution_type='rand
                         bye_teams.append(team1)
                     i += 2
             else:
-                # Следующие раунды: создаем матчи с учетом bye-команд
+                # Следующие раунды: создаем пустые матчи для будущих победителей
                 matches_count = math.ceil((len(round_teams) + len(bye_teams)) / 2)
-                matches = []
                 
                 # Создаем матчи для текущего раунда
                 for i in range(matches_count):
@@ -103,10 +102,10 @@ def create_single_elimination_bracket(tournament, teams, distribution_type='rand
                         order=i+1,
                         scheduled_time=current_time + timedelta(minutes=i * (get_match_duration(stage_format) + 30))
                     )
-                    matches.append(match)
                 
                 # Назначаем bye-команды в первый свободный слот следующего раунда
                 if bye_teams:
+                    matches = list(stage.matches.order_by('order'))
                     for idx, team in enumerate(bye_teams):
                         if idx < len(matches):
                             match = matches[idx]
@@ -119,7 +118,6 @@ def create_single_elimination_bracket(tournament, teams, distribution_type='rand
             
             # Обновляем время для следующего раунда
             current_time += timedelta(hours=math.ceil(get_match_duration(stage_format) / 60) + 1)
-            round_teams = []
         
         # Создаем матч за третье место, если нужно
         if third_place_match and total_rounds > 1:

@@ -1,6 +1,240 @@
 {% extends "app/layout.html" %}
 
 {% block content %}
+<style>
+    .matches-container {
+        background-color: #1a1a2e;
+        padding: 20px;
+        border-radius: 10px;
+        margin-top: 20px;
+    }
+
+    .section-header {
+        color: #4cc9f0;
+        font-weight: bold;
+        font-size: 20px;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #4cc9f0;
+        padding-bottom: 10px;
+    }
+
+    /* Карточки матчей */
+    .match-card {
+        background-color: #2d2d42;
+        border: 2px solid #4cc9f0;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .match-card:hover {
+        border-color: #3aa7cc;
+        box-shadow: 0 0 15px rgba(76, 201, 240, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .match-card.completed {
+        border-color: #28a745;
+    }
+
+    .match-card.completed:hover {
+        border-color: #20c997;
+        box-shadow: 0 0 15px rgba(40, 167, 69, 0.3);
+    }
+
+    /* Время матча */
+    .match-time {
+        color: #4cc9f0;
+        font-size: 14px;
+        margin-bottom: 15px;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    /* Команды в матче */
+    .match-teams {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        flex-grow: 1;
+        gap: 15px;
+    }
+
+    .team {
+        flex: 1;
+        text-align: center;
+        padding: 12px;
+        border-radius: 8px;
+        background-color: #1a1a2e;
+        color: #e6e6e6;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border: 1px solid #4cc9f0;
+        transition: all 0.3s ease;
+    }
+
+    .team:hover {
+        background-color: #3aa7cc;
+        color: white;
+        transform: scale(1.02);
+    }
+
+    .team.winner {
+        background-color: #28a745;
+        color: white;
+        border-color: #28a745;
+    }
+
+    .team.winner:hover {
+        background-color: #20c997;
+        border-color: #20c997;
+    }
+
+    .vs {
+        margin: 0 15px;
+        color: #4cc9f0;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    /* Счет */
+    .score {
+        background-color: #4cc9f0;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-weight: bold;
+        font-size: 14px;
+        min-width: 30px;
+        text-align: center;
+    }
+
+    /* Победитель */
+    .match-winner {
+        color: #28a745;
+        font-weight: bold;
+        margin-bottom: 15px;
+        text-align: center;
+        background-color: rgba(40, 167, 69, 0.1);
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #28a745;
+    }
+
+    /* Кнопки действий */
+    .match-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn-outline-primary {
+        background-color: transparent;
+        color: #4cc9f0;
+        border: 2px solid #4cc9f0;
+        border-radius: 20px;
+        padding: 8px 16px;
+        font-weight: bold;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #4cc9f0;
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        background-color: #4cc9f0;
+        color: white;
+        border: 2px solid #4cc9f0;
+        border-radius: 20px;
+        padding: 8px 16px;
+        font-weight: bold;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #3aa7cc;
+        border-color: #3aa7cc;
+        color: white;
+        text-decoration: none;
+    }
+
+    /* Заголовки секций */
+    .section-title {
+        color: #ffffff;
+        font-weight: bold;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Алерты */
+    .alert {
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .alert-info {
+        background-color: cornflowerblue !important;
+        color: #fff !important;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .match-teams {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .vs {
+            margin: 5px 0;
+        }
+
+        .match-actions {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .btn-outline-primary,
+        .btn-primary {
+            width: 100%;
+            max-width: 200px;
+        }
+    }
+
+    /* Анимация появления */
+    .match-card {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <div class="d-flex align-items-center">
@@ -12,199 +246,128 @@
         </a>
     </div>
 
-    {% if upcoming_matches %}
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Предстоящие матчи</h5>
+    <div class="matches-container">
+        {% if upcoming_matches %}
+        <div class="section-header">
+            <i class="fas fa-clock me-2"></i>Предстоящие матчи
         </div>
-        <div class="card-body">
-            <div class="row">
-                {% for match in upcoming_matches %}
-                <div class="col-md-6 mb-3">
-                    <div class="match-card">
-                        <div class="match-time">
-                            <i class="far fa-calendar-alt me-1"></i>
-                            {{ match.scheduled_time|date:"d.m.Y H:i" }}
+        <div class="row">
+            {% for match in upcoming_matches %}
+            {% if match.team1 and match.team2 %}
+            <div class="col-md-6 mb-3">
+                <div class="match-card">
+                    <div class="match-time">
+                        <i class="far fa-calendar-alt me-1"></i>
+                        {{ match.scheduled_time|date:"d.m.Y H:i" }}
+                    </div>
+                    <div class="match-teams">
+                        <div class="team">
+                            {{ match.team1.name|default:"TBD" }}
                         </div>
-                        <div class="match-teams">
-                            <div class="team">
-                                {{ match.team1.name }}
-                            </div>
-                            <div class="vs">vs</div>
-                            <div class="team">
-                                {{ match.team2.name }}
-                            </div>
-                        </div>
-                        <div class="match-actions">
-                            <a href="{% url 'match_detail' tournament_id=tournament.id match_id=match.id %}" class="btn btn-sm btn-outline-primary">
-                                <i class="fas fa-info-circle me-1"></i>Подробнее
-                            </a>
-                            {% if tournament.created_by == user %}
-                            <a href="{% url 'advanced_match_result' tournament.id match.id %}" class="btn btn-sm btn-primary">
-                                <i class="fas fa-edit me-1"></i>Редактировать результат
-                            </a>
-                            {% endif %}
+                        <div class="vs">vs</div>
+                        <div class="team">
+                            {{ match.team2.name|default:"TBD" }}
                         </div>
                     </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
-    {% if matches_by_stage %}
-    {% for stage, matches in matches_by_stage.items %}
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0"><i class="fas fa-trophy me-2"></i>{{ stage }}</h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                {% for match in matches %}
-                <div class="col-md-6 mb-3">
-                    <div class="match-card {% if match.is_completed %}completed{% endif %}">
-                        <div class="match-time">
-                            <i class="far fa-calendar-alt me-1"></i>
-                            {{ match.scheduled_time|date:"d.m.Y H:i" }}
-                        </div>
-                        <div class="match-teams">
-                            <div class="team {% if match.winner == match.team1 %}winner{% endif %}">
-                                {{ match.team1.name }}
-                                {% if match.team1_score is not None %}
-                                <span class="score">{{ match.team1_score }}</span>
-                                {% endif %}
-                            </div>
-                            <div class="vs">vs</div>
-                            <div class="team {% if match.winner == match.team2 %}winner{% endif %}">
-                                {{ match.team2.name }}
-                                {% if match.team2_score is not None %}
-                                <span class="score">{{ match.team2_score }}</span>
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% if match.is_completed %}
-                        <div class="match-winner">
-                            <i class="fas fa-trophy me-1"></i>
-                            Победитель: {{ match.winner.name }}
-                        </div>
+                    <div class="match-actions">
+                        <a href="{% url 'match_detail' tournament_id=tournament.id match_id=match.id %}" class="btn btn-outline-primary">
+                            <i class="fas fa-info-circle me-1"></i>Подробнее
+                        </a>
+                        {% if tournament.created_by == user %}
+                        <a href="{% url 'advanced_match_result' tournament.id match.id %}" class="btn btn-primary">
+                            <i class="fas fa-edit me-1"></i>Редактировать результат
+                        </a>
                         {% endif %}
-                        <div class="match-actions">
-                            <a href="{% url 'match_detail' tournament_id=tournament.id match_id=match.id %}" class="btn btn-sm btn-outline-primary">
-                                <i class="fas fa-info-circle me-1"></i>Подробнее
-                            </a>
-                            {% if tournament.created_by == user %}
-                            <a href="{% url 'advanced_match_result' tournament.id match.id %}" class="btn btn-sm btn-primary">
-                                <i class="fas fa-edit me-1"></i>Редактировать результат
-                            </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if matches_by_stage %}
+        {% for stage, matches in matches_by_stage.items %}
+        <div class="section-header">
+            <i class="fas fa-trophy me-2"></i>{{ stage }}
+        </div>
+        <div class="row">
+            {% for match in matches %}
+            <div class="col-md-6 mb-3">
+                <div class="match-card {% if match.is_completed %}completed{% endif %}">
+                    <div class="match-time">
+                        <i class="far fa-calendar-alt me-1"></i>
+                        {{ match.scheduled_time|date:"d.m.Y H:i" }}
+                    </div>
+                    <div class="match-teams">
+                        <div class="team {% if match.winner == match.team1 %}winner{% endif %}">
+                            {{ match.team1.name|default:"TBD" }}
+                            {% if match.team1_score is not None %}
+                            <span class="score">{{ match.team1_score }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="vs">vs</div>
+                        <div class="team {% if match.winner == match.team2 %}winner{% endif %}">
+                            {{ match.team2.name|default:"TBD" }}
+                            {% if match.team2_score is not None %}
+                            <span class="score">{{ match.team2_score }}</span>
                             {% endif %}
                         </div>
                     </div>
+                    {% if match.is_completed %}
+                    <div class="match-winner">
+                        <i class="fas fa-trophy me-1"></i>
+                        Победитель: {{ match.winner.name|default:"Не определен" }}
+                    </div>
+                    {% endif %}
+                    <div class="match-actions">
+                        <a href="{% url 'match_detail' tournament_id=tournament.id match_id=match.id %}" class="btn btn-outline-primary">
+                            <i class="fas fa-info-circle me-1"></i>Подробнее
+                        </a>
+                        {% if tournament.created_by == user %}
+                        <a href="{% url 'advanced_match_result' tournament.id match.id %}" class="btn btn-primary">
+                            <i class="fas fa-edit me-1"></i>Редактировать результат
+                        </a>
+                        {% endif %}
+                    </div>
                 </div>
-                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="alert alert-info d-flex align-items-center" role="alert">
+            <i class="fas fa-info-circle fa-2x me-3"></i>
+            <div>
+                <h5 class="alert-heading">Матчи не найдены</h5>
+                {% if tournament.created_by == user %}
+                <p class="mb-0">Для создания матчей необходимо сформировать турнирную сетку.</p>
+                {% else %}
+                <p class="mb-0">Матчи пока не созданы.</p>
+                {% endif %}
             </div>
         </div>
+        {% endif %}
     </div>
-    {% endfor %}
-    {% else %}
-    <div class="alert alert-info d-flex align-items-center" role="alert">
-        <i class="fas fa-info-circle fa-2x me-3"></i>
-        <div>
-            <h5 class="alert-heading">Матчи не найдены</h5>
-            {% if tournament.created_by == user %}
-            <p class="mb-0">Для создания матчей необходимо сформировать турнирную сетку.</p>
-            {% else %}
-            <p class="mb-0">Матчи пока не созданы.</p>
-            {% endif %}
-        </div>
-    </div>
-    {% endif %}
 </div>
 
-<style>
-    .match-card {
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        padding: 16px;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        border: 2px solid transparent;
-    }
-
-    .match-card.completed {
-        border-color: #28a745;
-    }
-
-    .match-time {
-        color: #666;
-        font-size: 0.95rem;
-        margin-bottom: 8px;
-    }
-
-    .match-teams {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 12px;
-        flex-grow: 1;
-    }
-
-    .team {
-        flex: 1;
-        text-align: center;
-        padding: 8px;
-        border-radius: 8px;
-        background: #f8f9fa;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-    }
-
-    .team.winner {
-        background: #d4edda;
-        color: #155724;
-        font-weight: bold;
-    }
-
-    .vs {
-        margin: 0 12px;
-        color: #888;
-        font-weight: bold;
-    }
-
-    .score {
-        background: #e9ecef;
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-weight: bold;
-    }
-
-    .match-winner {
-        color: #28a745;
-        font-weight: 500;
-        margin-bottom: 12px;
-        text-align: center;
-    }
-
-    .match-actions {
-        display: flex;
-        gap: 8px;
-        justify-content: center;
-    }
-
-    @media (max-width: 768px) {
-        .match-teams {
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .vs {
-            margin: 4px 0;
-        }
-    }
-</style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var matchCards = document.querySelectorAll('.match-card');
+    matchCards.forEach(function(card, index) {
+        card.style.animationDelay = (index * 0.1) + 's';
+    });
+    
+    var teams = document.querySelectorAll('.team');
+    teams.forEach(function(team) {
+        team.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.05)';
+        });
+        
+        team.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+});
+</script>
 {% endblock %}

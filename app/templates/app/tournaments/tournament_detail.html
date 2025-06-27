@@ -194,6 +194,331 @@
     #teams .text-center.text-muted {
         color: #a8a8a8 !important;
     }
+
+    /* Общие стили для секций */
+    .section-header {
+        border-bottom: 2px solid #4cc9f0;
+        padding-bottom: 15px;
+        margin-bottom: 25px;
+    }
+
+    .section-header h5 {
+        color: #ffffff;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .section-header p {
+        color: #a8a8a8;
+        margin-bottom: 0;
+    }
+
+    .section-subheader {
+        border-bottom: 1px solid #3a3a5a;
+        padding-bottom: 10px;
+    }
+
+    .section-subheader h6 {
+        color: #ffffff;
+        font-weight: bold;
+        margin-bottom: 0;
+    }
+
+    /* Информационные карточки */
+    .info-card {
+        background-color: #2d2d42;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+
+    .info-card-header {
+        background-color: #16213e;
+        border-bottom: 2px solid #4cc9f0;
+        padding: 12px 15px;
+    }
+
+    .info-card-header h6 {
+        color: #ffffff;
+        font-weight: bold;
+        margin-bottom: 0;
+    }
+
+    .info-card-body {
+        padding: 15px;
+        color: #e6e6e6;
+    }
+
+    .info-card-body .text-muted {
+        color: #a8a8a8 !important;
+    }
+
+    .info-card-body .text-white {
+        color: #ffffff !important;
+    }
+
+    .info-card-body .text-success {
+        color: #28a745 !important;
+    }
+
+    .info-card-body .text-primary {
+        color: #4cc9f0 !important;
+    }
+
+    /* Пустые состояния */
+    .empty-bracket-state,
+    .empty-matches-state {
+        background-color: #2d2d42;
+        border-radius: 10px;
+        padding: 40px 20px;
+        margin: 20px 0;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        color: #4cc9f0;
+        opacity: 0.7;
+    }
+
+    .empty-bracket-state h5,
+    .empty-matches-state h5 {
+        color: #e6e6e6;
+        font-weight: bold;
+    }
+
+    .empty-bracket-state p,
+    .empty-matches-state p {
+        color: #a8a8a8;
+        font-size: 1rem;
+    }
+
+    /* Матчи */
+    .matches-list {
+        margin-bottom: 30px;
+    }
+
+    .match-item {
+        background-color: #2d2d42;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .match-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .match-content {
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .match-teams {
+        display: flex;
+        align-items: center;
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .team {
+        flex: 1;
+        text-align: center;
+    }
+
+    .team-left {
+        text-align: right;
+        padding-right: 15px;
+    }
+
+    .team-right {
+        text-align: left;
+        padding-left: 15px;
+    }
+
+    .team-name {
+        color: #ffffff;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+
+    .match-vs {
+        padding: 0 20px;
+    }
+
+    .vs-text {
+        color: #4cc9f0;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+
+    .match-details {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        min-width: 200px;
+    }
+
+    .match-info {
+        color: #a8a8a8;
+        font-size: 0.9rem;
+    }
+
+    .match-format {
+        color: #a8a8a8;
+    }
+
+    .match-time {
+        color: #ffc107;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+
+    .match-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    /* Статистика матчей */
+    .matches-stats {
+        background-color: #2d2d42;
+        border-radius: 10px;
+        padding: 25px;
+    }
+
+    .stat-card {
+        background-color: #1a1a2e;
+        border-radius: 8px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: #4cc9f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        font-size: 1.2rem;
+    }
+
+    .stat-icon.completed {
+        background-color: #28a745;
+    }
+
+    .stat-icon.pending {
+        background-color: #ffc107;
+        color: #000000;
+    }
+
+    .stat-content {
+        flex: 1;
+    }
+
+    .stat-number {
+        color: #ffffff;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .stat-label {
+        color: #a8a8a8;
+        font-size: 0.9rem;
+    }
+
+    /* Кнопки */
+    .btn {
+        border-radius: 20px;
+        font-weight: bold;
+        padding: 8px 16px;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .btn-primary {
+        background-color: #4cc9f0;
+        border-color: #4cc9f0;
+        color: #ffffff;
+    }
+
+    .btn-primary:hover {
+        background-color: #3aa7cc;
+        border-color: #3aa7cc;
+        color: #ffffff;
+        transform: translateY(-1px);
+    }
+
+    .btn-outline-primary {
+        border-color: #4cc9f0;
+        color: #4cc9f0;
+        background-color: transparent;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #4cc9f0;
+        border-color: #4cc9f0;
+        color: #ffffff;
+    }
+
+    .btn-lg {
+        padding: 12px 24px;
+        font-size: 1.1rem;
+    }
+
+    .text-gray{
+        color: #a8a8a8
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .match-content {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 15px;
+        }
+
+        .match-teams {
+            min-width: auto;
+            order: 1;
+        }
+
+        .match-details {
+            min-width: auto;
+            order: 2;
+        }
+
+        .match-actions {
+            order: 3;
+            justify-content: center;
+        }
+
+        .section-header {
+            text-align: center;
+        }
+
+        .section-header .d-flex {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+    }
 </style>
 
 <div class="container">
@@ -268,77 +593,203 @@
 
                 <!-- Сетка -->
                 <div id="bracket" class="tab-pane fade">
-                    <div class="text-center py-4">
-                        <a href="{% url 'tournament_bracket' tournament_id=tournament.id %}" class="btn btn-info">
-                            <i class="fas fa-sitemap me-2"></i>
-                            Турнирная сетка
-                        </a>
+                    <div class="bracket-section">
+                        <div class="section-header mb-4">
+                            <h5 class="text-white">
+                                <i class="fas fa-sitemap me-2 text-primary"></i>
+                                Турнирная сетка
+                            </h5>
+                            <p class="text-gray">Просмотр и управление турнирной сеткой</p>
+                        </div>
+
+                        {% if tournament.bracket or tournament.round_robin_table %}
+                        <div class="bracket-info">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="info-card">
+                                        <div class="info-card-header">
+                                            <h6 class="mb-0">
+                                                <i class="fas fa-info-circle me-2 text-primary"></i>
+                                                Информация о сетке
+                                            </h6>
+                                        </div>
+                                        <div class="info-card-body">
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span class="text-muted">Тип сетки:</span>
+                                                <span class="fw-bold text-white">
+                                                    {% if tournament.bracket %}
+                                                    {{ tournament.get_tournament_format_display }}
+                                                    {% elif tournament.round_robin_table %}
+                                                    Round Robin
+                                                    {% endif %}
+                                                </span>
+                                            </div>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span class="text-muted">Статус:</span>
+                                                <span class="fw-bold text-success">
+                                                    {% if tournament.bracket or tournament.round_robin_table %}
+                                                    Создана
+                                                    {% else %}
+                                                    Не создана
+                                                    {% endif %}
+                                                </span>
+                                            </div>
+                                            <div class="d-flex justify-content-between">
+                                                <span class="text-muted">Матчей:</span>
+                                                <span class="fw-bold text-primary">
+                                                    {% if tournament.bracket %}
+                                                    {{ tournament.bracket.matches.count }}
+                                                    {% elif tournament.round_robin_table %}
+                                                    {{ tournament.round_robin_table.matches.count }}
+                                                    {% else %}
+                                                    0
+                                                    {% endif %}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="bracket-actions">
+                                        {% if tournament.bracket %}
+                                        <a href="{% url 'tournament_bracket' tournament_id=tournament.id %}" class="btn btn-primary w-100 mb-3">
+                                            <i class="fas fa-sitemap me-2"></i>
+                                            Просмотр сетки
+                                        </a>
+                                        {% elif tournament.round_robin_table %}
+                                        <a href="{% url 'round_robin_table' tournament.id %}" class="btn btn-primary w-100 mb-3">
+                                            <i class="fas fa-table me-2"></i>
+                                            Турнирная таблица
+                                        </a>
+                                        {% endif %}
+                                        
+                                        {% if is_creator %}
+                                        <a href="{% url 'tournament_matches' tournament.id %}" class="btn btn-outline-primary w-100">
+                                            <i class="fas fa-list me-2"></i>
+                                            Управление матчами
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="empty-bracket-state text-center py-5">
+                            <div class="empty-icon mb-4">
+                                <i class="fas fa-sitemap"></i>
+                            </div>
+                            <h5 class="text-white mb-3">Сетка турнира не создана</h5>
+                            <p class="text-muted mb-4">
+                                Для начала турнира необходимо создать турнирную сетку. 
+                                Это позволит сформировать матчи и начать соревнования.
+                            </p>
+                            {% if is_creator %}
+                            <a href="{% url 'generate_bracket' tournament.id %}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-plus me-2"></i>
+                                Создать сетку
+                            </a>
+                            {% else %}
+                            <p class="text-muted">Ожидайте создания сетки организатором</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
 
                 <!-- Матчи -->
                 <div id="matches" class="tab-pane fade">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5>Матчи</h5>
-                        <a href="{% url 'tournament_matches' tournament.id %}" class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-list me-1"></i>Все матчи
-                        </a>
-                    </div>
-
-                    {% if upcoming_matches %}
-                    <h6 class="text-warning">
-                        <i class="fas fa-clock me-2"></i>
-                        Предстоящие матчи
-                    </h6>
-                    {% for match in upcoming_matches %}
-                    <div class="card mb-3 border-warning">
-                        <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col-md-8">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div class="fw-bold">{{ match.team1.name }}</div>
-                                        <span class="text-primary fw-bold">VS</span>
-                                        <div class="fw-bold">{{ match.team2.name }}</div>
-                                    </div>
-                                    <small class="text-muted">
-                                        {% if match.stage %}
-                                        {{ match.stage.name }} - {{ match.stage.get_format_display }}
-                                        {% else %}
-                                        Round Robin
-                                        {% endif %}
-                                    </small>
+                    <div class="matches-section">
+                        <div class="section-header mb-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="text-white">
+                                        <i class="fas fa-trophy me-2 text-primary"></i>
+                                        Матчи турнира
+                                    </h5>
+                                    <p class="text-gray">Расписание и результаты матчей</p>
                                 </div>
-                                <div class="col-md-4 text-end">
-                                    <div class="text-warning small">
-                                        <i class="fas fa-calendar-alt me-1"></i>
-                                        {{ match.scheduled_time|date:"d.m.Y H:i" }}
-                                    </div>
-                                    <a href="{% url 'match_detail' tournament.id match.id %}"
-                                       class="btn btn-outline-primary btn-sm mt-1">
-                                        <i class="fas fa-eye me-1"></i>Подробнее
-                                    </a>
-                                </div>
+                                <a href="{% url 'tournament_matches' tournament.id %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-list me-1"></i>Все матчи
+                                </a>
                             </div>
                         </div>
-                    </div>
-                    {% endfor %}
-                    {% else %}
-                    <div class="text-center py-4">
-                        <i class="fas fa-info-circle fa-2x text-muted mb-2"></i>
-                        <p class="text-muted">
-                            {% if tournament.bracket or tournament.round_robin_table %}
-                            Нет предстоящих матчей
-                            {% else %}
-                            Сетка турнира еще не создана
+
+                        {% if upcoming_matches %}
+                        <div class="matches-list">
+                            <div class="section-subheader mb-3">
+                                <h6 class="text-warning">
+                                    <i class="fas fa-clock me-2"></i>
+                                    Предстоящие матчи
+                                </h6>
+                            </div>
+                            
+                            {% for match in upcoming_matches %}
+                            <div class="match-item">
+                                <div class="match-content">
+                                    <div class="match-teams">
+                                        <div class="team team-left">
+                                            <span class="team-name">{{ match.team1.name }}</span>
+                                        </div>
+                                        <div class="match-vs">
+                                            <span class="vs-text">VS</span>
+                                        </div>
+                                        <div class="team team-right">
+                                            <span class="team-name">{{ match.team2.name }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="match-details">
+                                        <div class="match-info">
+                                            <span class="match-format">
+                                                <i class="fas fa-gamepad me-1"></i>
+                                                {% if match.stage %}
+                                                {{ match.stage.name }} - {{ match.stage.get_format_display }}
+                                                {% else %}
+                                                Round Robin
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                        <div class="match-time">
+                                            <i class="fas fa-calendar-alt me-1"></i>
+                                            {{ match.scheduled_time|date:"d.m.Y H:i" }}
+                                        </div>
+                                    </div>
+                                    <div class="match-actions">
+                                        <a href="{% url 'match_detail' tournament.id match.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye me-1"></i>Подробнее
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="empty-matches-state text-center py-5">
+                            <div class="empty-icon mb-4">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                            <h5 class="text-white mb-3">
+                                {% if tournament.bracket or tournament.round_robin_table %}
+                                Нет предстоящих матчей
+                                {% else %}
+                                Матчи не созданы
+                                {% endif %}
+                            </h5>
+                            <p class="text-gray mb-4">
+                                {% if tournament.bracket or tournament.round_robin_table %}
+                                Все матчи завершены или еще не запланированы. 
+                                Проверьте расписание турнира.
+                                {% else %}
+                                Матчи будут созданы после формирования турнирной сетки.
+                                {% endif %}
+                            </p>
+                            {% if is_creator and not tournament.bracket and not tournament.round_robin_table %}
+                            <a href="{% url 'generate_bracket' tournament.id %}" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>Создать сетку
+                            </a>
                             {% endif %}
-                        </p>
-                        {% if is_creator and not tournament.bracket and not tournament.round_robin_table %}
-                        <a href="{% url 'generate_bracket' tournament.id %}" class="btn btn-primary">
-                            <i class="fas fa-plus me-1"></i>Создать сетку
-                        </a>
+                        </div>
                         {% endif %}
                     </div>
-                    {% endif %}
                 </div>
 
                 <!-- Команды -->

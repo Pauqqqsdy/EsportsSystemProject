@@ -1,24 +1,344 @@
 {% extends "app/layout.html" %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div class="d-flex align-items-center">
-            <i class="fas fa-table fa-2x text-primary me-3"></i>
-            <div>
-                <h1 class="mb-0">Турнирная таблица</h1>
-                <p class="text-muted mb-0">{{ tournament.name }}</p>
+<style>
+    /* Общие стили для roundrobin */
+    .roundrobin-container {
+        background-color: #1a1a2e;
+        color: #e6e6e6;
+    }
+
+    /* Заголовок */
+    .page-header {
+        background-color: #2d2d42;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        border-left: 4px solid #4cc9f0;
+    }
+
+    .page-header h1 {
+        color: #ffffff;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .page-header p {
+        color: #a8a8a8;
+        margin-bottom: 0;
+    }
+
+    /* Карточки */
+    .card {
+        background-color: #2d2d42;
+        border: none;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+        background-color: #16213e;
+        border-bottom: 2px solid #4cc9f0;
+        border-radius: 10px 10px 0 0 !important;
+        padding: 15px 20px;
+    }
+
+    .card-header h5 {
+        color: #ffffff;
+        font-weight: bold;
+        margin-bottom: 0;
+    }
+
+    .card-body {
+        padding: 20px;
+        color: #e6e6e6;
+    }
+
+    /* Таблица */
+    .table {
+        color: #e6e6e6;
+        margin-bottom: 0;
+    }
+
+    .table thead th {
+        background-color: #16213e;
+        color: #ffffff;
+        border-bottom: 2px solid #4cc9f0;
+        font-weight: bold;
+        text-align: center;
+        padding: 12px 8px;
+    }
+
+    .table tbody tr {
+        background-color: transparent;
+        transition: background-color 0.3s ease;
+    }
+
+    .table tbody tr:hover {
+        background-color: #1a1a2e;
+    }
+
+    .table tbody td {
+        border-color: #3a3a5a;
+        padding: 12px 8px;
+        vertical-align: middle;
+    }
+
+    /* Ссылки в таблице */
+    .table a {
+        color: #4cc9f0;
+        text-decoration: none;
+        font-weight: bold;
+        transition: color 0.3s ease;
+    }
+
+    .table a:hover {
+        color: #3aa7cc;
+        text-decoration: underline;
+    }
+
+    /* Цвета для статистики */
+    .text-success {
+        color: #28a745 !important;
+    }
+
+    .text-danger {
+        color: #dc3545 !important;
+    }
+
+    .text-primary {
+        color: #4cc9f0 !important;
+    }
+
+    .text-warning {
+        color: #ffc107 !important;
+    }
+
+    /* Матчи */
+    .match-card {
+        background-color: #1a1a2e;
+        border: 2px solid;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .match-card.border-success {
+        border-color: #28a745;
+        background-color: rgba(40, 167, 69, 0.1);
+    }
+
+    .match-card.border-warning {
+        border-color: #ffc107;
+        background-color: rgba(255, 193, 7, 0.1);
+    }
+
+    .match-card .card-body {
+        padding: 15px;
+    }
+
+    /* Бейджи */
+    .badge {
+        font-weight: bold;
+        padding: 6px 12px;
+        border-radius: 20px;
+    }
+
+    .bg-success {
+        background-color: #28a745 !important;
+        color: #ffffff !important;
+    }
+
+    .bg-warning {
+        background-color: #ffc107 !important;
+        color: #000000 !important;
+    }
+
+    .bg-primary {
+        background-color: #4cc9f0 !important;
+        color: #ffffff !important;
+    }
+
+    .bg-secondary {
+        background-color: #6c757d !important;
+        color: #ffffff !important;
+    }
+
+    /* Формы */
+    .form-select {
+        background-color: #1a1a2e;
+        border: 1px solid #4cc9f0;
+        color: #e6e6e6;
+        border-radius: 8px;
+    }
+
+    .form-select:focus {
+        background-color: #1a1a2e;
+        border-color: #3aa7cc;
+        color: #e6e6e6;
+        box-shadow: 0 0 0 0.2rem rgba(76, 201, 240, 0.25);
+    }
+
+    .form-text {
+        color: #a8a8a8;
+        font-size: 0.875rem;
+    }
+
+    /* Кнопки */
+    .btn {
+        border-radius: 20px;
+        font-weight: bold;
+        padding: 8px 16px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+        background-color: #4cc9f0;
+        border-color: #4cc9f0;
+        color: #ffffff;
+    }
+
+    .btn-primary:hover {
+        background-color: #3aa7cc;
+        border-color: #3aa7cc;
+        color: #ffffff;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        color: #ffffff;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+        border-color: #5a6268;
+        color: #ffffff;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+        color: #ffffff;
+    }
+
+    .btn-success:hover {
+        background-color: #218838;
+        border-color: #218838;
+        color: #ffffff;
+    }
+
+    /* Правая колонка */
+    .info-sidebar {
+        background-color: #2d2d42;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .info-sidebar h6 {
+        color: #ffffff;
+        font-weight: bold;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #4cc9f0;
+        padding-bottom: 8px;
+    }
+
+    .info-sidebar p {
+        color: #a8a8a8;
+        margin-bottom: 8px;
+    }
+
+    .info-sidebar strong {
+        color: #e6e6e6;
+    }
+
+    /* Список предстоящих матчей */
+    .list-group {
+        background-color: transparent;
+    }
+
+    .list-group-item {
+        background-color: #1a1a2e;
+        border: 1px solid #3a3a5a;
+        color: #e6e6e6;
+        padding: 12px 15px;
+    }
+
+    .list-group-item:hover {
+        background-color: #2d2d42;
+    }
+
+    .list-group-item a {
+        color: #4cc9f0;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .list-group-item a:hover {
+        color: #3aa7cc;
+        text-decoration: underline;
+    }
+
+    /* Пустое состояние */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #a8a8a8;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        color: #4cc9f0;
+    }
+
+    .empty-state h3 {
+        color: #e6e6e6;
+        margin-bottom: 15px;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .page-header {
+            padding: 15px;
+        }
+        
+        .card-body {
+            padding: 15px;
+        }
+        
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+    }
+
+    .text-muted {
+        color: #a8a8a8 !important;
+    }
+</style>
+
+<div class="container mt-4 roundrobin-container">
+    <div class="page-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-table fa-2x text-primary me-3"></i>
+                <div>
+                    <h1 class="mb-0">Турнирная таблица</h1>
+                    <p class="text-muted mb-0">{{ tournament.name }}</p>
+                </div>
             </div>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="{% url 'tournament_detail' tournament.id %}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left me-1"></i>Назад к турниру
-            </a>
-            {% if is_creator and not table %}
-            <a href="{% url 'generate_bracket' tournament_id=tournament.id %}" class="btn btn-primary">
-                <i class="fas fa-plus me-1"></i>Сформировать таблицу
-            </a>
-            {% endif %}
+            <div class="d-flex gap-2">
+                <a href="{% url 'tournament_detail' tournament.id %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Назад к турниру
+                </a>
+                {% if is_creator and not table %}
+                <a href="{% url 'generate_bracket' tournament_id=tournament.id %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>Сформировать таблицу
+                </a>
+                {% endif %}
+            </div>
         </div>
     </div>
 
@@ -36,7 +356,7 @@
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-hover mb-0">
-                            <thead class="table-dark">
+                            <thead>
                                 <tr>
                                     <th class="text-center">#</th>
                                     <th>Команда</th>
@@ -100,7 +420,7 @@
                     <div class="row">
                         {% for match in table.matches.all %}
                         <div class="col-md-6 mb-3">
-                            <div class="card {% if match.is_completed %}border-success{% else %}border-warning{% endif %}">
+                            <div class="match-card {% if match.is_completed %}border-success{% else %}border-warning{% endif %}">
                                 <div class="card-body p-3">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <small class="text-muted">
@@ -186,9 +506,10 @@
                         </div>
                         {% empty %}
                         <div class="col-12">
-                            <div class="text-center text-muted py-4">
-                                <i class="fas fa-info-circle fa-2x mb-3 d-block"></i>
-                                Матчи еще не созданы
+                            <div class="empty-state">
+                                <i class="fas fa-info-circle"></i>
+                                <h3>Матчи еще не созданы</h3>
+                                <p>Ожидайте создания матчей организатором турнира</p>
                             </div>
                         </div>
                         {% endfor %}
@@ -199,92 +520,80 @@
 
         <div class="col-lg-4">
             <!-- Информация о турнире -->
-            <div class="card bg-light mb-4">
-                <div class="card-header">
-                    <h6 class="mb-0">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Информация о турнире
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <p><strong>Дисциплина:</strong> {{ tournament.discipline }}</p>
-                    <p><strong>Формат игр:</strong> {{ tournament.game_format }}</p>
-                    <p><strong>Команд:</strong> {{ tournament.registered_teams_count }}/{{ tournament.max_teams }}</p>
-                    <p>
-                        <strong>Статус:</strong>
-                        <span class="badge
-                                {% if tournament.get_status == 'planned' %}bg-secondary
-                                {% elif tournament.get_status == 'in_progress' %}bg-warning text-dark
-                                {% elif tournament.get_status == 'completed' %}bg-success
-                                {% endif %}">
-                            {{ tournament.get_status_display }}
-                        </span>
-                    </p>
-                </div>
+            <div class="info-sidebar">
+                <h6>
+                    <i class="fas fa-info-circle me-2"></i>
+                    Информация о турнире
+                </h6>
+                <p><strong>Дисциплина:</strong> {{ tournament.discipline }}</p>
+                <p><strong>Формат игр:</strong> {{ tournament.game_format }}</p>
+                <p><strong>Команд:</strong> {{ tournament.registered_teams_count }}/{{ tournament.max_teams }}</p>
+                <p>
+                    <strong>Статус:</strong>
+                    <span class="badge
+                            {% if tournament.get_status == 'planned' %}bg-secondary
+                            {% elif tournament.get_status == 'in_progress' %}bg-warning text-dark
+                            {% elif tournament.get_status == 'completed' %}bg-success
+                            {% endif %}">
+                        {{ tournament.get_status_display }}
+                    </span>
+                </p>
             </div>
 
             <!-- Предстоящие матчи -->
             {% if upcoming_matches %}
-            <div class="card shadow-sm">
-                <div class="card-header">
-                    <h6 class="mb-0">
-                        <i class="fas fa-clock me-2"></i>
-                        Предстоящие матчи
-                    </h6>
-                </div>
-                <div class="card-body p-0">
-                    <div class="list-group list-group-flush">
-                        {% for match in upcoming_matches %}
-                        <div class="list-group-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    {% if tournament.game_format == '1x1' and match.team1.players.first and match.team2.players.first %}
-                                    <a href="{% url 'view_profile' match.team1.players.first.user.username %}" class="text-decoration-none">
-                                        <div class="fw-bold">{{ match.team1.name }}</div>
-                                    </a>
-                                    <a href="{% url 'view_profile' match.team2.players.first.user.username %}" class="text-decoration-none">
-                                        <div class="fw-bold">{{ match.team2.name }}</div>
-                                    </a>
-                                    {% else %}
+            <div class="info-sidebar">
+                <h6>
+                    <i class="fas fa-clock me-2"></i>
+                    Предстоящие матчи
+                </h6>
+                <div class="list-group list-group-flush">
+                    {% for match in upcoming_matches %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                {% if tournament.game_format == '1x1' and match.team1.players.first and match.team2.players.first %}
+                                <a href="{% url 'view_profile' match.team1.players.first.user.username %}" class="text-decoration-none">
                                     <div class="fw-bold">{{ match.team1.name }}</div>
+                                </a>
+                                <a href="{% url 'view_profile' match.team2.players.first.user.username %}" class="text-decoration-none">
                                     <div class="fw-bold">{{ match.team2.name }}</div>
-                                    {% endif %}
+                                </a>
+                                {% else %}
+                                <div class="fw-bold">{{ match.team1.name }}</div>
+                                <div class="fw-bold">{{ match.team2.name }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="text-end">
+                                <div class="text-muted small">
+                                    {{ match.scheduled_time|date:"d.m.Y" }}
                                 </div>
-                                <div class="text-end">
-                                    <div class="text-muted small">
-                                        {{ match.scheduled_time|date:"d.m.Y" }}
-                                    </div>
-                                    <div class="text-muted small">
-                                        {{ match.scheduled_time|date:"H:i" }}
-                                    </div>
+                                <div class="text-muted small">
+                                    {{ match.scheduled_time|date:"H:i" }}
                                 </div>
                             </div>
                         </div>
-                        {% endfor %}
                     </div>
+                    {% endfor %}
                 </div>
             </div>
             {% endif %}
 
             <!-- Легенда -->
-            <div class="card mt-3">
-                <div class="card-header">
-                    <h6 class="mb-0">
-                        <i class="fas fa-question-circle me-2"></i>
-                        Обозначения
-                    </h6>
-                </div>
-                <div class="card-body small">
-                    <p class="mb-2"><strong>И</strong> - Игр сыграно</p>
-                    <p class="mb-2"><strong>П</strong> - Побед</p>
-                    <p class="mb-2"><strong>Пр</strong> - Поражений</p>
-                    <p class="mb-2"><strong>О</strong> - Очков</p>
-                    <p class="mb-0"><strong>%</strong> - Процент побед</p>
-                </div>
+            <div class="info-sidebar">
+                <h6>
+                    <i class="fas fa-question-circle me-2"></i>
+                    Обозначения
+                </h6>
+                <p class="mb-2"><strong>И</strong> - Игр сыграно</p>
+                <p class="mb-2"><strong>П</strong> - Побед</p>
+                <p class="mb-2"><strong>Пр</strong> - Поражений</p>
+                <p class="mb-2"><strong>О</strong> - Очков</p>
+                <p class="mb-0"><strong>%</strong> - Процент побед</p>
             </div>
 
             {% if tournament.status == 'scheduled' and tournament.organizer == request.user %}
-            <div class="mb-4">
+            <div class="info-sidebar">
                 {% if not tournament.round_robin_matches.exists and not tournament.bracket %}
                 <form method="post" action="{% url 'generate_round_robin' tournament.id %}" class="mb-3">
                     {% csrf_token %}
@@ -296,7 +605,7 @@
                             <option value="BO5">BO5</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary">Сформировать турнирную сетку</button>
+                    <button type="submit" class="btn btn-primary w-100">Сформировать турнирную сетку</button>
                 </form>
                 {% endif %}
             </div>
@@ -304,13 +613,13 @@
         </div>
     </div>
     {% else %}
-    <div class="text-center py-5">
-        <i class="fas fa-table fa-3x text-muted mb-3"></i>
-        <h3 class="text-muted">Турнирная таблица еще не создана</h3>
+    <div class="empty-state">
+        <i class="fas fa-table"></i>
+        <h3>Турнирная таблица еще не создана</h3>
         {% if is_creator %}
-        <p class="text-muted">Нажмите кнопку "Сформировать таблицу" для создания турнирной сетки</p>
+        <p>Нажмите кнопку "Сформировать таблицу" для создания турнирной сетки</p>
         {% else %}
-        <p class="text-muted">Ожидайте создания турнирной таблицы организатором</p>
+        <p>Ожидайте создания турнирной таблицы организатором</p>
         {% endif %}
     </div>
     {% endif %}

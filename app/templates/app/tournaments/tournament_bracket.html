@@ -4,26 +4,156 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-bracket@0.11.1/dist/jquery.bracket.min.css">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jquery-bracket@0.11.1/dist/jquery.bracket.min.js"></script>
+
+<style>
+    #tournament-bracket {
+        background-color: #1a1a2e;
+        padding: 20px;
+        border-radius: 10px;
+        margin-top: 20px;
+        overflow-x: auto;
+    }
+
+    /* Стили для заголовка сетки */
+    .bracket-header {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #ffffff;
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .jQBracket .team {
+        background-color: #2d2d42 !important;
+        color: #e6e6e6 !important;
+        border: 1px solid #4cc9f0 !important;
+        border-radius: 4px !important;
+        padding: 8px 12px !important;
+        margin: 2px 0 !important;
+        font-weight: bold !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .jQBracket .team:hover {
+        background-color: #3aa7cc !important;
+        color: white !important;
+        transform: scale(1.02) !important;
+    }
+
+    .jQBracket .team.win {
+        background-color: #28a745 !important;
+        color: white !important;
+        border-color: #28a745 !important;
+    }
+
+    .jQBracket .team.lose {
+        background-color: #dc3545 !important;
+        color: white !important;
+        border-color: #dc3545 !important;
+    }
+
+    .jQBracket .team.playing {
+        background-color: #ffc107 !important;
+        color: #000 !important;
+        border-color: #ffc107 !important;
+    }
+
+    /* Стили для раундов */
+    .jQBracket .round {
+        margin: 0 20px !important;
+    }
+
+    .jQBracket .roundLabel {
+        color: #4cc9f0 !important;
+        font-weight: bold !important;
+        font-size: 16px !important;
+        text-align: center !important;
+        margin-bottom: 15px !important;
+    }
+
+    /* Стили для матчей */
+    .jQBracket .match {
+        background-color: transparent !important;
+        border: none !important;
+        margin-bottom: 15px !important;
+    }
+
+    /* Стили для счетов */
+    .jQBracket .score {
+        color: #4cc9f0 !important;
+        font-weight: bold !important;
+        font-size: 14px !important;
+    }
+
+    /* Стили для линий соединения */
+    .jQBracket .bracket {
+        background-color: transparent !important;
+    }
+
+    .jQBracket .bracket .round {
+        background-color: transparent !important;
+    }
+
+    /* Анимация появления */
+    .jQBracket {
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        #tournament-bracket {
+            padding: 10px;
+        }
+        
+        .jQBracket .round {
+            margin: 0 10px !important;
+        }
+    }
+</style>
+
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <div class="d-flex align-items-center">
             <i class="fas fa-sitemap fa-2x text-primary me-3"></i>
             <h1 class="mb-0">Турнирная сетка "{{ tournament.name }}"</h1>
         </div>
-        {% if is_creator and not bracket and not tournament.round_robin_table %}
-        <a href="{% url 'generate_bracket' tournament_id=tournament.id %}" class="btn btn-primary">
-            <i class="fas fa-plus me-1"></i>Сформировать сетку
-        </a>
-        {% endif %}
+        <div class="d-flex gap-2">
+            <a href="{% url 'tournament_detail' tournament.id %}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left me-1"></i>Назад к турниру
+            </a>
+            {% if is_creator and not bracket and not tournament.round_robin_table %}
+            <a href="{% url 'generate_bracket' tournament_id=tournament.id %}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>Сформировать сетку
+            </a>
+            {% endif %}
+        </div>
     </div>
 
     {% if bracket_data %}
+    <div class="bracket-header">
+        <i class="fas fa-trophy me-2"></i>Турнирная сетка
+    </div>
     <div id="tournament-bracket"></div>
     <script>
     $(function() {
         var data = {{ bracket_data|safe }};
         $('#tournament-bracket').bracket({
-            init: data
+            init: data,
+            teamWidth: 120,
+            scoreWidth: 40,
+            matchMargin: 60,
+            roundMargin: 50
         });
     });
     </script>
@@ -32,6 +162,7 @@
         <i class="fas fa-info-circle fa-2x me-3"></i>
         <div>
             <h5 class="alert-heading">Сетка сформирована, но нет данных для отображения</h5>
+            <p class="mb-0">Ожидайте начала турнира для просмотра матчей.</p>
         </div>
     </div>
     {% else %}
