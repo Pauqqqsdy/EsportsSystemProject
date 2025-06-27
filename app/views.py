@@ -25,7 +25,7 @@ from django.db import transaction
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView
-from .statistics import update_round_robin_results
+from .statistics import update_round_robin_results, update_all_round_robin_results
 import json
 
 class CustomPasswordResetView(PasswordResetView):
@@ -1058,8 +1058,8 @@ def round_robin_match_result(request, tournament_id, match_id):
             match.is_completed = True
             match.save()
             
-            # Обновляем результаты в таблице
-            update_round_robin_results(match)
+            # Автоматически обновляем статистику всей таблицы
+            update_all_round_robin_results(match.table)
             
             messages.success(request, 'Результат матча успешно обновлен')
         else:
@@ -1078,6 +1078,13 @@ def round_robin_table(request, tournament_id):
     
     table = getattr(tournament, 'round_robin_table', None)
     is_creator = tournament.is_creator(request.user) if request.user.is_authenticated else False
+    
+    # Автоматически обновляем статистику при загрузке страницы
+    if table:
+        completed_matches = table.matches.filter(is_completed=True)
+        if completed_matches.exists():
+            # Обновляем статистику для всей таблицы за один раз
+            update_all_round_robin_results(table)
     
     # Получаем предстоящие матчи
     upcoming_matches = []
@@ -1225,7 +1232,7 @@ def generate_round_robin(request, tournament_id):
         return redirect('tournament_detail', tournament_id=tournament_id)
     
     # Проверяем, есть ли хотя бы 2 команды
-    if tournament.teams.count() < 2:
+    if tournament.registered_teams.count() < 2:
         messages.error(request, 'Для генерации матчей необходимо минимум 2 команды')
         return redirect('tournament_detail', tournament_id=tournament_id)
     

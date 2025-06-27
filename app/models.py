@@ -609,8 +609,8 @@ class RoundRobinResult(models.Model):
         """Получить процент побед"""
         if self.matches_played == 0:
             return 0
-        # Считаем процент побед как (победы + 0.5 * ничьи) / всего матчей * 100
-        return round(((self.wins + (self.draws * 0.5)) / self.matches_played) * 100, 1)
+        # Считаем процент побед как победы / всего матчей * 100
+        return round((self.wins / self.matches_played) * 100, 1)
 
 
 class RoundRobinMatch(models.Model):
@@ -691,12 +691,4 @@ class RoundRobinMatch(models.Model):
                     raise ValidationError(f"Время матча пересекается с матчем {match}")
     
     def save(self, *args, **kwargs):
-        is_new = self.pk is None
-        was_completed = self.is_completed if not is_new else False
         super().save(*args, **kwargs)
-        
-        # Обновляем результаты только если матч завершен и это не новый матч
-        if self.is_completed and not is_new:
-            # Импортируем функцию из statistics.py для обновления статистики
-            from .statistics import update_round_robin_results
-            update_round_robin_results(self)
