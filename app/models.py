@@ -615,11 +615,18 @@ class RoundRobinResult(models.Model):
 
 class RoundRobinMatch(models.Model):
     """Матч в Round Robin турнире"""
+    FORMAT_CHOICES = [
+        ('BO1', 'Best of 1'),
+        ('BO3', 'Best of 3'),
+        ('BO5', 'Best of 5'),
+    ]
+    
     table = models.ForeignKey(RoundRobinTable, on_delete=models.CASCADE, related_name='matches')
     team1 = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='team1_round_robin_matches')
     team2 = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='team2_round_robin_matches')
     team1_score = models.PositiveIntegerField(default=0)
     team2_score = models.PositiveIntegerField(default=0)
+    format = models.CharField(max_length=3, choices=FORMAT_CHOICES, default='BO1', verbose_name="Формат матча")
     scheduled_time = models.DateTimeField(null=True, blank=True)
     is_completed = models.BooleanField(default=False)
     round_number = models.PositiveIntegerField(default=1)
@@ -632,6 +639,12 @@ class RoundRobinMatch(models.Model):
     def __str__(self):
         return f"{self.team1.name} vs {self.team2.name}"
     
+    def get_score_display(self):
+        """Получить отображение счета"""
+        if self.is_completed:
+            return f"{self.team1_score}-{self.team2_score}"
+        return "vs"
+    
     def clean(self):
         """Валидация модели"""
         if self.is_completed:
@@ -640,14 +653,14 @@ class RoundRobinMatch(models.Model):
                 'BO1': 1,
                 'BO3': 2,
                 'BO5': 3
-            }[self.table.tournament.game_format]
+            }[self.format]
             
             if self.team1_score > format_max_score or self.team2_score > format_max_score:
-                raise ValidationError(f"Счет не может быть больше {format_max_score} для формата {self.table.tournament.game_format}")
+                raise ValidationError(f"Счет не может быть больше {format_max_score} для формата {self.format}")
             
             # Проверяем, что победитель набрал нужное количество очков
             if max(self.team1_score, self.team2_score) != format_max_score:
-                raise ValidationError(f"Победитель должен набрать {format_max_score} очков в формате {self.table.tournament.game_format}")
+                raise ValidationError(f"Победитель должен набрать {format_max_score} очков в формате {self.format}")
         
         # Валидация времени матча
         if self.scheduled_time:
@@ -655,7 +668,7 @@ class RoundRobinMatch(models.Model):
                 'BO1': 30,  # 30 минут
                 'BO3': 90,  # 1.5 часа
                 'BO5': 150  # 2.5 часа
-            }[self.table.tournament.game_format]
+            }[self.format]
             
             start_time = self.scheduled_time
             end_time = start_time + timedelta(minutes=match_duration)
@@ -672,66 +685,18 @@ class RoundRobinMatch(models.Model):
                     'BO1': 30,
                     'BO3': 90,
                     'BO5': 150
-                }[self.table.tournament.game_format])
+                }[self.format])
                 
                 if (start_time <= match_end and end_time >= match_start):
                     raise ValidationError(f"Время матча пересекается с матчем {match}")
     
     def save(self, *args, **kwargs):
         is_new = self.pk is None
+        was_completed = self.is_completed if not is_new else False
         super().save(*args, **kwargs)
         
-        # Обновляем результаты только если матч завершен
+        # Обновляем результаты только если матч завершен и это не новый матч
         if self.is_completed and not is_new:
-            self.update_table_results()
-    
-    def update_table_results(self):
-        """Обновляет результаты в таблице"""
-        # Получаем результаты обеих команд
-        team1_result = RoundRobinResult.objects.get(table=self.table, team=self.team1)
-        team2_result = RoundRobinResult.objects.get(table=self.table, team=self.team2)
-        
-        # Сбрасываем статистику для обеих команд
-        team1_result.matches_played = 0
-        team1_result.wins = 0
-        team1_result.losses = 0
-        team1_result.draws = 0
-        team1_result.points = 0
-        
-        team2_result.matches_played = 0
-        team2_result.wins = 0
-        team2_result.losses = 0
-        team2_result.draws = 0
-        team2_result.points = 0
-        
-        # Пересчитываем статистику на основе всех завершенных матчей
-        completed_matches = RoundRobinMatch.objects.filter(
-            table=self.table,
-            is_completed=True
-        )
-        
-        for match in completed_matches:
-            if match.team1 == self.team1 or match.team2 == self.team1:
-                team1_result.matches_played += 1
-                if match.team1_score > match.team2_score:
-                    team1_result.wins += 1
-                    team1_result.points += 3
-                elif match.team1_score < match.team2_score:
-                    team1_result.losses += 1
-                else:
-                    team1_result.draws += 1
-                    team1_result.points += 1
-            
-            if match.team1 == self.team2 or match.team2 == self.team2:
-                team2_result.matches_played += 1
-                if match.team1_score < match.team2_score:
-                    team2_result.wins += 1
-                    team2_result.points += 3
-                elif match.team1_score > match.team2_score:
-                    team2_result.losses += 1
-                else:
-                    team2_result.draws += 1
-                    team2_result.points += 1
-        
-        team1_result.save()
-        team2_result.save()
+            # Импортируем функцию из statistics.py для обновления статистики
+            from .statistics import update_round_robin_results
+            update_round_robin_results(self)

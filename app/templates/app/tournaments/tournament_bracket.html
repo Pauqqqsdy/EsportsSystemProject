@@ -1,6 +1,9 @@
 {% extends "app/layout.html" %}
 
 {% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-bracket@0.11.1/dist/jquery.bracket.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-bracket@0.11.1/dist/jquery.bracket.min.js"></script>
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <div class="d-flex align-items-center">
@@ -14,103 +17,21 @@
         {% endif %}
     </div>
 
-    {% if bracket %}
-    <div class="bracket-container">
-        <div class="bracket-navigation">
-            <button class="btn btn-outline-primary" id="scrollLeft">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="btn btn-outline-primary" id="scrollRight">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-        </div>
-        <div class="bracket-grid" id="bracketGrid">
-            {# Для single elimination показываем только обычные раунды, финал и матч за 3 место #}
-            {% if tournament.tournament_format == 'single_elimination' %}
-            {% for stage in bracket.stages.all %}
-            {% if stage.stage_type == 'normal' or stage.stage_type == 'final' or stage.stage_type == 'third_place' %}
-            <div class="bracket-round">
-                <div class="bracket-round-title">{{ stage.name }}</div>
-                {% for match in stage.matches.all %}
-                <div class="bracket-match {% if match.is_completed %}completed{% endif %}">
-                    <div class="bracket-team {% if match.winner == match.team1 %}winner{% endif %}">
-                        {{ match.team1.name|default:"-" }}
-                    </div>
-                    <div class="bracket-vs">vs</div>
-                    <div class="bracket-team {% if match.winner == match.team2 %}winner{% endif %}">
-                        {{ match.team2.name|default:"-" }}
-                    </div>
-                    {% if match.is_completed %}
-                    <div class="bracket-winner">Победитель: {{ match.winner.name }}</div>
-                    {% endif %}
-                    {% if is_creator and not match.is_completed and match.team1 and match.team2 %}
-                    <div class="bracket-action">
-                        {% if match.stage.format == 'BO3' %}
-                        <form class="score-form d-flex flex-column gap-1" data-match-id="{{ match.id }}">
-                            {% csrf_token %}
-                            <div class="input-group input-group-sm mb-1">
-                                <input type="number" min="0" max="2" data-max="2" class="form-control" name="team1_score" placeholder="{{ match.team1.name }}" required>
-                                <span class="input-group-text">:</span>
-                                <input type="number" min="0" max="2" data-max="2" class="form-control" name="team2_score" placeholder="{{ match.team2.name }}" required>
-                            </div>
-                            <button type="submit" class="btn btn-success btn-sm mt-1">Сохранить счет</button>
-                            <div class="score-error text-danger small mt-1" style="display:none;"></div>
-                        </form>
-                        {% elif match.stage.format == 'BO5' %}
-                        <form class="score-form d-flex flex-column gap-1" data-match-id="{{ match.id }}">
-                            {% csrf_token %}
-                            <div class="input-group input-group-sm mb-1">
-                                <input type="number" min="0" max="3" data-max="3" class="form-control" name="team1_score" placeholder="{{ match.team1.name }}" required>
-                                <span class="input-group-text">:</span>
-                                <input type="number" min="0" max="3" data-max="3" class="form-control" name="team2_score" placeholder="{{ match.team2.name }}" required>
-                            </div>
-                            <button type="submit" class="btn btn-success btn-sm mt-1">Сохранить счет</button>
-                            <div class="score-error text-danger small mt-1" style="display:none;"></div>
-                        </form>
-                        {% else %}
-                        <form class="score-form d-flex flex-column gap-1" data-match-id="{{ match.id }}">
-                            {% csrf_token %}
-                            <div class="input-group input-group-sm mb-1">
-                                <input type="number" min="0" max="1" data-max="1" class="form-control" name="team1_score" placeholder="{{ match.team1.name }}" required>
-                                <span class="input-group-text">:</span>
-                                <input type="number" min="0" max="1" data-max="1" class="form-control" name="team2_score" placeholder="{{ match.team2.name }}" required>
-                            </div>
-                            <button type="submit" class="btn btn-success btn-sm mt-1">Сохранить счет</button>
-                            <div class="score-error text-danger small mt-1" style="display:none;"></div>
-                        </form>
-                        {% endif %}
-                    </div>
-                    {% endif %}
-                    {% if match.is_completed %}
-                    <div class="bracket-score">Счет: {{ match.team1_score }} : {{ match.team2_score }}</div>
-                    {% endif %}
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-            {% endfor %}
-            {% else %}
-            {# Старый вывод для double elimination и других форматов #}
-            {% for stage in bracket.stages.all %}
-            <div class="bracket-round">
-                <div class="bracket-round-title">{{ stage.name }}</div>
-                {% for match in stage.matches.all %}
-                <div class="bracket-match {% if match.is_completed %}completed{% endif %}">
-                    <div class="bracket-team {% if match.winner == match.team1 %}winner{% endif %}">
-                        {{ match.team1.name|default:"-" }}
-                    </div>
-                    <div class="bracket-vs">vs</div>
-                    <div class="bracket-team {% if match.winner == match.team2 %}winner{% endif %}">
-                        {{ match.team2.name|default:"-" }}
-                    </div>
-                    {% if match.is_completed %}
-                    <div class="bracket-winner">Победитель: {{ match.winner.name }}</div>
-                    {% endif %}
-                </div>
-                {% endfor %}
-            </div>
-            {% endfor %}
-            {% endif %}
+    {% if bracket_data %}
+    <div id="tournament-bracket"></div>
+    <script>
+    $(function() {
+        var data = {{ bracket_data|safe }};
+        $('#tournament-bracket').bracket({
+            init: data
+        });
+    });
+    </script>
+    {% elif bracket %}
+    <div class="alert alert-info d-flex align-items-center" role="alert">
+        <i class="fas fa-info-circle fa-2x me-3"></i>
+        <div>
+            <h5 class="alert-heading">Сетка сформирована, но нет данных для отображения</h5>
         </div>
     </div>
     {% else %}
@@ -127,231 +48,4 @@
     </div>
     {% endif %}
 </div>
-
-<style>
-    .bracket-container {
-        position: relative;
-        width: 100%;
-        overflow: hidden;
-    }
-
-    .bracket-navigation {
-        position: absolute;
-        top: 50%;
-        left: 0;
-        right: 0;
-        transform: translateY(-50%);
-        display: flex;
-        justify-content: space-between;
-        padding: 0 10px;
-        z-index: 10;
-    }
-
-    .bracket-grid {
-        display: flex;
-        flex-direction: row;
-        gap: 32px;
-        padding: 20px 0;
-        overflow-x: auto;
-        scroll-behavior: smooth;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .bracket-round {
-        min-width: 280px;
-        background: #f8f9fa;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        padding: 16px;
-    }
-
-    .bracket-round-title {
-        font-size: 1.1rem;
-        font-weight: 500;
-        margin-bottom: 12px;
-        color: #333;
-        text-align: center;
-    }
-
-    .bracket-match {
-        background: #fff;
-        border-radius: 8px;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-        padding: 10px 8px;
-        margin-bottom: 8px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        border: 2px solid transparent;
-        position: relative;
-    }
-
-        .bracket-match.completed {
-            border-color: #28a745;
-        }
-
-    .bracket-team {
-        width: 120px;
-        text-align: center;
-        padding: 6px 0;
-        border-radius: 6px;
-        background: #f1f3f4;
-        margin: 2px 0;
-        font-weight: 500;
-    }
-
-        .bracket-team.winner {
-            background: #d4edda;
-            color: #155724;
-            font-weight: bold;
-        }
-
-    .bracket-vs {
-        font-size: 1.1rem;
-        color: #888;
-        margin: 2px 0;
-    }
-
-    .bracket-winner {
-        color: #28a745;
-        font-size: 0.95rem;
-        margin-top: 4px;
-        font-weight: bold;
-    }
-
-    .bracket-action {
-        margin-top: 6px;
-    }
-
-    @media (max-width: 768px) {
-        .bracket-navigation {
-            display: none;
-        }
-    }
-</style>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const bracketGrid = document.querySelector('.bracket-grid');
-        const scrollLeftBtn = document.getElementById('scrollLeft');
-        const scrollRightBtn = document.getElementById('scrollRight');
-
-        if (bracketGrid && scrollLeftBtn && scrollRightBtn) {
-            scrollLeftBtn.addEventListener('click', () => {
-                bracketGrid.scrollBy({ left: -300, behavior: 'smooth' });
-            });
-
-            scrollRightBtn.addEventListener('click', () => {
-                bracketGrid.scrollBy({ left: 300, behavior: 'smooth' });
-            });
-
-            // Enable mouse drag scrolling
-            let isDown = false;
-            let startX;
-            let scrollLeft;
-
-            bracketGrid.addEventListener('mousedown', (e) => {
-                isDown = true;
-                bracketGrid.style.cursor = 'grabbing';
-                startX = e.pageX - bracketGrid.offsetLeft;
-                scrollLeft = bracketGrid.scrollLeft;
-            });
-
-            bracketGrid.addEventListener('mouseleave', () => {
-                isDown = false;
-                bracketGrid.style.cursor = 'grab';
-            });
-
-            bracketGrid.addEventListener('mouseup', () => {
-                isDown = false;
-                bracketGrid.style.cursor = 'grab';
-            });
-
-            bracketGrid.addEventListener('mousemove', (e) => {
-                if (!isDown) return;
-                e.preventDefault();
-                const x = e.pageX - bracketGrid.offsetLeft;
-                const walk = (x - startX) * 2;
-                bracketGrid.scrollLeft = scrollLeft - walk;
-            });
-        }
-    });
-
-    // Drag-scroll для .bracket-grid
-    const bracketGrid = document.getElementById('bracketGrid');
-    let isDown = false;
-    let startX, scrollLeft;
-    if (bracketGrid) {
-        bracketGrid.addEventListener('mousedown', (e) => {
-            isDown = true;
-            bracketGrid.classList.add('active');
-            startX = e.pageX - bracketGrid.offsetLeft;
-            scrollLeft = bracketGrid.scrollLeft;
-        });
-        bracketGrid.addEventListener('mouseleave', () => {
-            isDown = false;
-            bracketGrid.classList.remove('active');
-        });
-        bracketGrid.addEventListener('mouseup', () => {
-            isDown = false;
-            bracketGrid.classList.remove('active');
-        });
-        bracketGrid.addEventListener('mousemove', (e) => {
-            if (!isDown) return;
-            e.preventDefault();
-            const x = e.pageX - bracketGrid.offsetLeft;
-            const walk = (x - startX) * 1.5; // скорость скролла
-            bracketGrid.scrollLeft = scrollLeft - walk;
-        });
-    }
-
-    // AJAX сохранение счета матча
-    const tournamentId = {{ tournament.id }};
-    document.querySelectorAll('.score-form').forEach(form => {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const matchId = this.getAttribute('data-match-id');
-            const team1_input = this.querySelector('input[name="team1_score"]');
-            const team2_input = this.querySelector('input[name="team2_score"]');
-            const team1_score = parseInt(team1_input.value, 10);
-            const team2_score = parseInt(team2_input.value, 10);
-            const max_score = parseInt(team1_input.getAttribute('data-max'), 10);
-            const csrf = this.querySelector('input[name="csrfmiddlewaretoken"]').value;
-            const errorDiv = this.querySelector('.score-error');
-            // Валидация
-            if (isNaN(team1_score) || isNaN(team2_score) || team1_score < 0 || team2_score < 0 || team1_score > max_score || team2_score > max_score) {
-                errorDiv.style.display = '';
-                errorDiv.textContent = `Счет должен быть от 0 до ${max_score}`;
-                return;
-            }
-            if (!((team1_score === max_score && team2_score < max_score) || (team2_score === max_score && team1_score < max_score))) {
-                errorDiv.style.display = '';
-                errorDiv.textContent = `Победитель должен набрать ${max_score}, а проигравший меньше`;
-                return;
-            }
-            fetch(`/tournaments/${tournamentId}/bracket/match/${matchId}/score/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrf,
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: `team1_score=${team1_score}&team2_score=${team2_score}`
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.reload();
-                    return;
-                } else {
-                    errorDiv.style.display = '';
-                    errorDiv.textContent = data.error || 'Ошибка';
-                }
-            })
-            .catch(() => {
-                errorDiv.style.display = '';
-                errorDiv.textContent = 'Ошибка сети';
-            });
-        });
-    });
-</script>
 {% endblock %}

@@ -216,26 +216,31 @@ def create_round_robin_bracket(tournament, teams=None):
     
     # Получаем команды турнира, если они не переданы
     if teams is None:
-        teams = list(tournament.teams.all())
+        teams = list(tournament.registered_teams.all())
     else:
         teams = list(teams)
     
+    print(f"Создаем таблицу для {len(teams)} команд: {[team.name for team in teams]}")
+    
     # Создаем результаты для всех команд
     for team in teams:
-        RoundRobinResult.objects.create(
+        result = RoundRobinResult.objects.create(
             table=table,
             team=team,
+            matches_played=0,
             wins=0,
             losses=0,
             draws=0,
-            points=0
+            points=0,
+            map_difference=0
         )
+        print(f"Создан результат для команды {team.name}: {result}")
     
     # Определяем формат матча на основе формата турнира
     match_format = 'BO1'  # По умолчанию
-    if tournament.tournament_format == 'BO3':
+    if tournament.game_format == '3x3':
         match_format = 'BO3'
-    elif tournament.tournament_format == 'BO5':
+    elif tournament.game_format == '5x5':
         match_format = 'BO5'
     
     # Определяем длительность матча в зависимости от формата

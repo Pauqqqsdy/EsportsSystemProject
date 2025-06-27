@@ -1,14 +1,14 @@
 ﻿from datetime import datetime
 from django.conf import settings
 from django.conf.urls.static import static
-from django.urls import path
+from django.urls import path, include
 from django.contrib import admin
 from django.contrib.auth.views import LoginView, LogoutView
 from app import forms, views
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
-
+    path('admin/', admin.site.urls),  # Подключение Django admin
     # Общее
     path('', views.home, name='home'),
     path('register/', views.register, name='register'),

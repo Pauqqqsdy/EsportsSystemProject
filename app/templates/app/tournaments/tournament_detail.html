@@ -349,7 +349,7 @@
                         {% for team in registered_teams %}
                         <div class="team-card">
                             {% if tournament.game_format == '1x1' %}
-                            <img src="{{ team.captain.userprofile.avatar.url }}" alt="{{ team.captain.username }}">
+                            <img src="{% if team.captain.userprofile.avatar %}{{ team.captain.userprofile.avatar.url }}{% else %}{% static 'avatars/default.jpg' %}{% endif %}" alt="{{ team.captain.username }}">
                             <a href="{% url 'view_profile' username=team.captain.username %}">{{ team.captain.username }}</a>
                             {% else %}
                             <img src="{{ team.avatar.url }}" alt="{{ team.name }}">
@@ -387,7 +387,7 @@
 
                 <!-- Организатор -->
                 <div class="creator-card">
-                    <img src="{{ tournament.creator.userprofile.avatar.url }}" alt="Аватар">
+                    <img src="{% if tournament.creator.userprofile.avatar %}{{ tournament.creator.userprofile.avatar.url }}{% else %}{% static 'avatars/default.jpg' %}{% endif %}" alt="Аватар">
                     <span>{{ tournament.creator.username }}</span>
                 </div>
 
